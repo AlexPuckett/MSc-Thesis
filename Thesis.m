@@ -62,11 +62,18 @@ ax = uiaxes(t1,'Position',[30 130 600 450]); % Axes to display the floor plan
 b_detectWalls = uibutton(t1,'Position',[650 525 140 22],'Text','Detect Walls');
 b_detectWalls.Enable = 'off'; % Disable until an image is loaded
 
+% Adding a button to add points
+b_addPoint = uibutton(t1, 'Position', [650 500 140 22], 'Text', 'Add Point');
+b_addPoint.Enable = 'off'; % Disable until an image is loaded
+
 % Callback to load image
-b_loadImage.ButtonPushedFcn = @(btn,event) loadImage(ax, b_detectWalls);
+b_loadImage.ButtonPushedFcn = @(btn,event) loadImage(ax, b_detectWalls, b_addPoint);
 
 % Callback to detect walls
 b_detectWalls.ButtonPushedFcn = @(btn,event) detectWalls(ax);
+
+% Callback to add points
+b_addPoint.ButtonPushedFcn = @(btn, event) enablePointAdding(ax);
 
 % Assigning callbacks for dropdowns to handle unit conversion
 dR.ValueChangedFcn = @(dd,event) unitConversionRAKR(dd, efR);
@@ -75,23 +82,22 @@ dD.ValueChangedFcn = @(dd,event) unitConversionDuration(dd, efD);
 dTr.ValueChangedFcn = @(dd,event) unitConversionTreatments(dd, efTr);
 dP.ValueChangedFcn = @(dd,event) unitConversionDesignLimit(dd, efP);
 
-% Functions
+% FUNCTIONS
 % Function to load an image
-function loadImage(ax, b_detectWalls)
+function loadImage(ax, b_detectWalls, b_addPoint)
     % Let user select an image file
     [file, path] = uigetfile({'*.jpg;*.jpeg;*.png;*.bmp;*.tif', 'All Image Files'}, 'Select Floor Plan');
-    if isequal(file,0)
+    if isequal(file, 0)
         return;
     end
-     % Display the image on the axes
+
+    % Display the image on the axes
     img = imread(fullfile(path, file));
     imshow(img, 'Parent', ax);
-    
-    % Enable the detect walls button
-    b_detectWalls.Enable = 'on';
 
-    % Disable interactive pan/zoom
-    
+    % Enable the detect walls and add point buttons
+    b_detectWalls.Enable = 'on';
+    b_addPoint.Enable = 'on';
 end
 
 % Function to detect walls in the image
@@ -121,6 +127,39 @@ function detectWalls(ax)
 
     % Display the processed binary image
     imshow(bw, 'Parent', ax);
+
+    % Set HitTest of the image to 'off' to ensure clicks are registered by the axes
+    imgHandle = findobj(ax, 'Type', 'image');
+    set(imgHandle, 'HitTest', 'off');
+
+    % Enable point adding after wall detection
+    ax.PickableParts = 'all';
+end
+
+% Function to enable adding points on the image
+function enablePointAdding(ax)
+
+    % Reset any previous button-down functions
+    ax.ButtonDownFcn = [];
+    
+    % Set the ButtonDownFcn of the axes to allow point addition
+    ax.ButtonDownFcn = @(src, event) addPoint(src, event);
+end
+
+% Function to add a point on the image
+function addPoint(src, event)
+
+    % Get the current point coordinates
+    cp = event.IntersectionPoint(1:2);
+
+    % Plot the point on the axes
+    hold(src, 'on'); % Keep existing image
+    plot(src, cp(1), cp(2), 'ro', 'MarkerSize', 10, 'LineWidth', 2);
+    hold(src, 'off');
+    
+    % Display the coordinates in the command window (or use for further processing)
+    disp(['Point added at: X=', num2str(cp(1)), ', Y=', num2str(cp(2))]);
+
 end
 
 % Callback Functions for unit conversion
