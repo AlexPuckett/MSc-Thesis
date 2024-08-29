@@ -101,8 +101,9 @@ function loadImage(ax, b_detectWalls, b_addPoint)
 end
 
 % Function to detect walls in the image
+% Function to detect walls in the image and solidify them
 function detectWalls(ax)
-    %Retrieve the image from the axes
+    % Retrieve the image from the axes
     imgHandle = findobj(ax, 'Type', 'image');
     if isempty(imgHandle)
         return;
@@ -117,16 +118,30 @@ function detectWalls(ax)
         grayImg = img;
     end
 
-    % Threshold the image to create a binary image
-    bw = imbinarize(grayImg, 'adaptive', 'ForegroundPolarity', 'dark', 'Sensitivity', 0.4);
+    % Invert the image so walls (black lines) become white on a black background
+    invertedImg = imcomplement(grayImg);
 
-    % Apply morphological operations
-    se = strel('rectangle', [5, 5]);
-    bw = imclose(bw, se); % Close small gaps
-    bw = imopen(bw, se);  % Remove small noise
+    % Use edge detection to enhance wall lines
+    edges = edge(invertedImg, 'Canny', 0.2);  % Adjust the threshold for better detection
 
-    % Display the processed binary image
-    imshow(bw, 'Parent', ax);
+    % Dilate the edges to make the walls thicker and more solid
+    se = strel('line', 2, 0);  % Line structuring element for horizontal lines
+    dilatedEdges = imdilate(edges, se);
+    se = strel('line', 2, 90);  % Line structuring element for vertical lines
+    dilatedEdges = imdilate(dilatedEdges, se);
+
+    % Close gaps in the walls
+    se = strel('disk', 2);  % Disk structuring element to close gaps
+    closedWalls = imclose(dilatedEdges, se);
+
+    % Fill any holes within the wall structures
+    filledWalls = imfill(closedWalls, 'holes');
+
+    % Remove small noise
+    cleanWalls = bwareaopen(filledWalls, 50);  % Remove small objects (noise)
+
+    % Display the processed binary image with solidified walls
+    imshow(cleanWalls, 'Parent', ax);
 
     % Set HitTest of the image to 'off' to ensure clicks are registered by the axes
     imgHandle = findobj(ax, 'Type', 'image');
@@ -158,7 +173,7 @@ function addPoint(src, event)
     
     % Normalize the coordinates
     normX = cp(1) / imgWidth;
-    normY = cp(2) / imgHeight;
+    normY = 1 - (cp(2) / imgHeight);
 
     % Remove any previous point
     oldPoints = findobj(src, 'Type', 'line');
