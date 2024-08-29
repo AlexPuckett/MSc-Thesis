@@ -148,9 +148,21 @@ end
 
 % Function to add a point on the image
 function addPoint(src, event)
-
     % Get the current point coordinates
     cp = event.IntersectionPoint(1:2);
+
+    % Retrieve the image dimensions
+    imgHandle = findobj(src, 'Type', 'image');
+    img = imgHandle.CData;
+    [imgHeight, imgWidth, ~] = size(img);
+    
+    % Normalize the coordinates
+    normX = cp(1) / imgWidth;
+    normY = cp(2) / imgHeight;
+
+    % Remove any previous point
+    oldPoints = findobj(src, 'Type', 'line');
+    delete(oldPoints);
 
     % Plot the point on the axes
     hold(src, 'on'); % Keep existing image
@@ -158,7 +170,7 @@ function addPoint(src, event)
     hold(src, 'off');
     
     % Display the coordinates in the command window (or use for further processing)
-    disp(['Point added at: X=', num2str(cp(1)), ', Y=', num2str(cp(2))]);
+    disp(['Point added at: X=', num2str(normX), ', Y=', num2str(normY)]);
 
 end
 
