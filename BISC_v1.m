@@ -47,8 +47,8 @@ treatmentsEditField = uieditfield(shieldingTab, 'numeric', 'Position', [200 475 
 designLimitEditField = uieditfield(shieldingTab, 'numeric', 'Position', [200 450 50 22], "ValueDisplayFormat", "%.2f");
 distanceEditField = uieditfield(shieldingTab, 'numeric', 'Position', [200 425 50 22], "ValueDisplayFormat", "%.2f");
 occupationFactorEditField = uieditfield(shieldingTab, 'numeric', 'Position', [200 400 50 22], "ValueDisplayFormat", "%.2f");
-workloadEditField = uieditfield(shieldingTab, 'numeric', 'Position', [200 350 50 22], "ValueDisplayFormat", "%.1e");
-transmissionFactorEditField = uieditfield(shieldingTab, 'numeric', 'Position', [200 325 50 22], "ValueDisplayFormat", "%.1e");
+workloadValue = uilabel(shieldingTab, 'Text', '-', 'Position', [170, 350, 50, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+transmissionFactorValue = uilabel(shieldingTab, 'Text', '-', 'Position', [170, 325, 50, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
 
 % Labels for workload calculations
 activityLabel = uilabel(shieldingTab, 'Text', 'Activity', 'Position', [20, 525, 100, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
@@ -87,7 +87,7 @@ thicknessValues.Concrete = uilabel(shieldingTab, 'Text', '-', 'Position', [170, 
 
 % Button for calculation
 calcButton = uibutton(shieldingTab, 'Position', [20 375 140 22], 'Text', 'Calculate');
-calcButton.ButtonPushedFcn = @(btn, event) calculateShieldingThickness(sourceDropdown, activityEditField, durationEditField, treatmentsEditField, workloadEditField, designLimitEditField, distanceEditField, occupationFactorEditField, transmissionFactorEditField, thicknessValues, sourceData);
+calcButton.ButtonPushedFcn = @(btn, event) calculateShieldingThickness(sourceDropdown, activityEditField, durationEditField, treatmentsEditField, workloadValue, designLimitEditField, distanceEditField, occupationFactorEditField, transmissionFactorValue, thicknessValues, sourceData);
 
 % Assigning callbacks for dropdowns
 activityUnitDropdown.ValueChangedFcn = @(dd, event) convertActivityUnit(dd, activityEditField);
@@ -142,13 +142,15 @@ function updateSourceData(sourceDropdown, sourceData)
 end
 
 % Callback function for shielding thickness calculation
-function calculateShieldingThickness(sourceDropdown, activityEditField, durationEditField, treatmentsEditField, workloadEditField, designLimitEditField, distanceEditField, occupationFactorEditField, transmissionFactorEditField, thicknessValues, sourceData)
+function calculateShieldingThickness(sourceDropdown, activityEditField, durationEditField, treatmentsEditField, workloadValue, designLimitEditField, distanceEditField, occupationFactorEditField, transmissionFactorValue, thicknessValues, sourceData)
     selectedSource = sourceData.(sourceDropdown.Value);
-    workloadEditField.Value = selectedSource.RAKR * activityEditField.Value * durationEditField.Value * treatmentsEditField.Value;
-    transmissionFactorEditField.Value = (designLimitEditField.Value * distanceEditField.Value^2) / (workloadEditField.Value * occupationFactorEditField.Value);
+    workload = selectedSource.RAKR * activityEditField.Value * durationEditField.Value * treatmentsEditField.Value;
+    workloadValue.Text = sprintf('%.2f', workload);
+    transmissionFactor = (designLimitEditField.Value * distanceEditField.Value^2) / (workload * occupationFactorEditField.Value);
+    transmissionFactorValue.Text = sprintf('%.2f', transmissionFactor);
 
     % Calculate the attenuation factor
-    attenuationFactor = log10(1 / transmissionFactorEditField.Value);
+    attenuationFactor = log10(1 / transmissionFactor);
 
     % Calculate and display thickness for each material
     materials = fieldnames(selectedSource.TVLe);

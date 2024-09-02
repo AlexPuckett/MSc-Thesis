@@ -1,69 +1,104 @@
 clear all
 clc
 
-%Creating Tabs and properties
-fig = uifigure("Name","BISC"); %Brachytherapy Infrastructure Shielding Calculations
-fig.Resize = 'off'; % Disable resizing
-fig.WindowState = 'normal'; % Ensure the window is in normal state (not maximized or minimized)
-set(fig, 'Units', 'normalized', 'Position',  [0.1, 0.1, 0.8, 0.8]);
+% Creating the main UI figure
+mainFig = uifigure("Name", "Brachytherapy Infrastructure Shielding Calculations");
+mainFig.Resize = 'off'; % Disable resizing
+mainFig.WindowState = 'normal'; % Ensure the window is in normal state
+set(mainFig, 'Units', 'normalized', 'Position', [0.1, 0.1, 0.8, 0.8]);
 
-tg = uitabgroup(fig,'Units','normalized',"Position",[0,0,1,1]);
-t1 = uitab(tg,"Title","Shielding Thickness");
-t1.Scrollable = "on";
+% Creating tab group and tabs
+tabGroup = uitabgroup(mainFig, 'Units', 'normalized', "Position", [0, 0, 1, 1]);
+shieldingTab = uitab(tabGroup, "Title", "Shielding Thickness");
+shieldingTab.Scrollable = "on";
 
-%Creatring the Numeric Edit Fields for Workload Calculations
-efR = uieditfield(t1,'numeric','Position',[1000 550 50 22],"ValueDisplayFormat","%.2f"); %RAKR
-efA = uieditfield(t1,'numeric','Position',[1000 525 50 22],"ValueDisplayFormat","%.2f"); %Activity
-efD = uieditfield(t1,'numeric','Position',[1000 500 50 22],"ValueDisplayFormat","%.2f"); %Duration
-efTr = uieditfield(t1,'numeric','Position',[1000 475 50 22],"ValueDisplayFormat","%.2f"); %Treatments
+% Source data
+sourceData = struct();
+sourceData.Ir192.RAKR = 0.111;
+sourceData.Ir192.TVLe = struct('Lead', 16, 'Steel', 43, 'Concrete', 152);
+sourceData.Ir192.TVL1 = struct('Lead', [], 'Steel', 49, 'Concrete', []);
+sourceData.Co60.RAKR = 0.308;
+sourceData.Co60.TVLe = struct('Lead', 41, 'Steel', 71, 'Concrete', 218);
+sourceData.Co60.TVL1 = struct('Lead', [], 'Steel', 87, 'Concrete', 245);
+sourceData.I125.RAKR = 0.034;
+sourceData.I125.TVLe = struct('Lead', 0.1, 'Steel', [], 'Concrete', []);
+sourceData.I125.TVL1 = struct('Lead', [], 'Steel', [], 'Concrete', []);
+sourceData.Cs137.RAKR = 0.077;
+sourceData.Cs137.TVLe = struct('Lead', 22, 'Steel', 53, 'Concrete', 175);
+sourceData.Cs137.TVL1 = struct('Lead', [], 'Steel', 69, 'Concrete', []);
+sourceData.Au198.RAKR = 0.056;
+sourceData.Au198.TVLe = struct('Lead', 11, 'Steel', [], 'Concrete', 142);
+sourceData.Au198.TVL1 = struct('Lead', [], 'Steel', [], 'Concrete', []);
+sourceData.Ra226.RAKR = 0.195;
+sourceData.Ra226.TVLe = struct('Lead', 45, 'Steel', 76, 'Concrete', 240);
+sourceData.Ra226.TVL1 = struct('Lead', [], 'Steel', 86, 'Concrete', []);
 
-%Creatring the Numeric Edit Fields for Transition Factor Calculations
-efP = uieditfield(t1,'numeric','Position',[1000 450 50 22],"ValueDisplayFormat","%.2f"); %Design Limit
-efd = uieditfield(t1,'numeric','Position',[1000 425 50 22],"ValueDisplayFormat","%.2f"); %distance from barrier
-efT = uieditfield(t1,'numeric','Position',[1000 400 50 22],"ValueDisplayFormat","%.2f"); %Occupation Factor
-efw = uieditfield(t1,'numeric','Position',[1000 350 50 22],"ValueDisplayFormat","%.0e"); %Workload
-efB = uieditfield(t1,'numeric','Position',[1000 325 50 22],"ValueDisplayFormat","%.0e"); %Transmission Factor
+% Dropdown for sources
+sourceLabel = uilabel(shieldingTab, 'Text', 'Source', 'Position', [790, 550, 100, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+sourceDropdown = uidropdown(shieldingTab, "Items", fieldnames(sourceData), 'Position', [890, 550, 130, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+sourceDropdown.ValueChangedFcn = @(dd, event) updateSourceData(dd, sourceData);
 
-%Creating the Edit Field Labels for Workload Calculations
-lR = uilabel(t1, 'Text', 'RAKR', 'Position', [830, 550, 125, 22],'FontWeight', 'bold', 'FontSize', 10, 'FontColor','black');
-dR = uidropdown(t1, "Items", ["μGym^2/MBqh","mGym^2/MBqh","Gym^2/MBqh"], 'Position', [920, 550, 70, 22],'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+% Numeric edit fields for workload calculations
+activityEditField = uieditfield(shieldingTab, 'numeric', 'Position', [970 525 50 22], "ValueDisplayFormat", "%.2f");
+durationEditField = uieditfield(shieldingTab, 'numeric', 'Position', [970 500 50 22], "ValueDisplayFormat", "%.2f");
+treatmentsEditField = uieditfield(shieldingTab, 'numeric', 'Position', [970 475 50 22], "ValueDisplayFormat", "%.2f");
 
-lA = uilabel(t1, 'Text', 'Activity', 'Position', [830, 525, 100, 22],'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
-dA = uidropdown(t1, "Items", ["GBq","MBq","kBq","Bq"], 'Position', [920, 525, 70, 22],'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+% Numeric edit fields for transition factor calculations
+designLimitEditField = uieditfield(shieldingTab, 'numeric', 'Position', [970 450 50 22], "ValueDisplayFormat", "%.2f");
+distanceEditField = uieditfield(shieldingTab, 'numeric', 'Position', [970 425 50 22], "ValueDisplayFormat", "%.2f");
+occupationFactorEditField = uieditfield(shieldingTab, 'numeric', 'Position', [970 400 50 22], "ValueDisplayFormat", "%.2f");
+workloadValue = uilabel(shieldingTab, 'Text', '-', 'Position', [960, 350, 50, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+transmissionFactorValue = uilabel(shieldingTab, 'Text', '-', 'Position', [960, 325, 50, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
 
-lD = uilabel(t1, 'Text', 'Duration', 'Position', [830 500 50 22],'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
-dD = uidropdown(t1, "Items", ["hours","minutes","seconds"], 'Position', [920 500 70 22],'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+% Labels for workload calculations
+activityLabel = uilabel(shieldingTab, 'Text', 'Activity', 'Position', [790, 525, 100, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+activityUnitDropdown = uidropdown(shieldingTab, "Items", ["MBq", "Bq", "kBq", "GBq"], 'Position', [890, 525, 70, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
 
-lTr = uilabel(t1, 'Text', 'Treatments', 'Position', [830, 475, 120, 22],'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
-dTr = uidropdown(t1, "Items", ["Tre/week"], 'Position', [920, 475, 70, 22],'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+durationLabel = uilabel(shieldingTab, 'Text', 'Duration', 'Position', [790, 500, 50, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+durationUnitDropdown = uidropdown(shieldingTab, "Items", ["hours", "minutes", "seconds"], 'Position', [890, 500, 70, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
 
-%Creating the Edit Field Labels for Transmission Factor Calculation
-lP = uilabel(t1, 'Text', 'Design Limit [μGy]', 'Position', [830, 450, 125, 22],'FontWeight', 'bold', 'FontSize', 10, 'FontColor','black');
-dP = uidropdown(t1, "Items", ["Controlled Area","Uncontrolled Area","Public Area"], 'Position', [920, 450, 70, 22],'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+treatmentsLabel = uilabel(shieldingTab, 'Text', 'Treatments', 'Position', [790, 475, 120, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+treatmentsUnitDropdown = uidropdown(shieldingTab, "Items", ["per week"], 'Position', [890, 475, 70, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
 
-ld = uilabel(t1, 'Text', 'Distance', 'Position', [830, 425, 125, 22],'FontWeight', 'bold', 'FontSize', 10, 'FontColor','black');
-dd = uidropdown(t1, "Items", ["meters"], 'Position', [920, 425, 70, 22],'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+% Labels for transition factor calculations
+designLimitLabel = uilabel(shieldingTab, 'Text', 'Design Limit [μGy]', 'Position', [790, 450, 125, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+designLimitAreaDropdown = uidropdown(shieldingTab, "Items", ["Controlled Area", "Uncontrolled Area", "Public Area"], 'Position', [890, 450, 70, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
 
-lT = uilabel(t1, 'Text', 'Occupation Factor', 'Position', [830, 400, 125, 22],'FontWeight', 'bold', 'FontSize', 10, 'FontColor','black');
+distanceLabel = uilabel(shieldingTab, 'Text', 'Distance', 'Position', [790, 425, 125, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+distanceUnitDropdown = uidropdown(shieldingTab, "Items", ["meters"], 'Position', [890, 425, 70, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
 
-lw = uilabel(t1, 'Text', 'Workload [μGym^2/week]', 'Position', [830, 350, 125, 22],'FontWeight', 'bold', 'FontSize', 10, 'FontColor','black');
+occupationFactorLabel = uilabel(shieldingTab, 'Text', 'Occupation Factor', 'Position', [790, 400, 125, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
 
-B = uilabel(t1, 'Text', 'TransmissionFactor', 'Position', [830, 325, 140, 22],'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+workloadLabel = uilabel(shieldingTab, 'Text', 'Workload [μGym^2/week]', 'Position', [790, 350, 125, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
 
-%Creating button and its Callback for Workload Calcualtion
-b = uibutton(t1,'Position',[830 375 140 22],'Text','Calc');
-b.ButtonPushedFcn = @(btn,event) calculateValue(efR, efA, efD, efTr, efw, efP, efd, efT, efB);
+transmissionFactorLabel = uilabel(shieldingTab, 'Text', 'Transmission Factor', 'Position', [790, 325, 140, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+
+% Labels and fields to display calculated thickness
+thicknessLabels = struct();
+thicknessLabels.Lead = uilabel(shieldingTab, 'Text', 'Lead Thickness [mm]:', 'Position', [790, 300, 150, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+thicknessLabels.Steel = uilabel(shieldingTab, 'Text', 'Steel Thickness [mm]:', 'Position', [790, 275, 150, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+thicknessLabels.Concrete = uilabel(shieldingTab, 'Text', 'Concrete Thickness [mm]:', 'Position', [790, 250, 150, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+
+% Labels to display calculated values
+thicknessValues = struct();
+thicknessValues.Lead = uilabel(shieldingTab, 'Text', '-', 'Position', [960, 300, 100, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+thicknessValues.Steel = uilabel(shieldingTab, 'Text', '-', 'Position', [960, 275, 100, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+thicknessValues.Concrete = uilabel(shieldingTab, 'Text', '-', 'Position', [960, 250, 100, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+
+% Button for calculation
+calcButton = uibutton(shieldingTab, 'Position', [790 375 140 22], 'Text', 'Calculate');
+calcButton.ButtonPushedFcn = @(btn, event) calculateShieldingThickness(sourceDropdown, activityEditField, durationEditField, treatmentsEditField, workloadValue, designLimitEditField, distanceEditField, occupationFactorEditField, transmissionFactorValue, thicknessValues, sourceData);
 
 % Adding a button to load the floor plan image
-b_loadImage = uibutton(t1,'Position',[650 550 140 22],'Text','Load Floor Plan');
-ax = uiaxes(t1,'Position',[30 130 600 450]); % Axes to display the floor plan
+b_loadImage = uibutton(shieldingTab,'Position',[630 550 140 22],'Text','Load Floor Plan');
+ax = uiaxes(shieldingTab,'Position',[30 130 600 450]); % Axes to display the floor plan
 
 % Adding a button to detect walls
-b_detectWalls = uibutton(t1,'Position',[650 525 140 22],'Text','Detect Walls');
+b_detectWalls = uibutton(shieldingTab,'Position',[630 525 140 22],'Text','Detect Walls');
 b_detectWalls.Enable = 'off'; % Disable until an image is loaded
 
 % Adding a button to add points
-b_addPoint = uibutton(t1, 'Position', [650 500 140 22], 'Text', 'Add Point');
+b_addPoint = uibutton(shieldingTab, 'Position', [630 500 140 22], 'Text', 'Add Point');
 b_addPoint.Enable = 'off'; % Disable until an image is loaded
 
 % Callback to load image
@@ -75,12 +110,11 @@ b_detectWalls.ButtonPushedFcn = @(btn,event) detectWalls(ax);
 % Callback to add points
 b_addPoint.ButtonPushedFcn = @(btn, event) enablePointAdding(ax);
 
-% Assigning callbacks for dropdowns to handle unit conversion
-dR.ValueChangedFcn = @(dd,event) unitConversionRAKR(dd, efR);
-dA.ValueChangedFcn = @(dd,event) unitConversionActivity(dd, efA);
-dD.ValueChangedFcn = @(dd,event) unitConversionDuration(dd, efD);
-dTr.ValueChangedFcn = @(dd,event) unitConversionTreatments(dd, efTr);
-dP.ValueChangedFcn = @(dd,event) unitConversionDesignLimit(dd, efP);
+% Assigning callbacks for dropdowns
+activityUnitDropdown.ValueChangedFcn = @(dd, event) convertActivityUnit(dd, activityEditField);
+durationUnitDropdown.ValueChangedFcn = @(dd, event) convertDurationUnit(dd, durationEditField);
+treatmentsUnitDropdown.ValueChangedFcn = @(dd, event) convertTreatmentsUnit(dd, treatmentsEditField);
+designLimitAreaDropdown.ValueChangedFcn = @(dd, event) setDesignLimit(dd, designLimitEditField);
 
 % FUNCTIONS
 % Function to load an image
@@ -100,7 +134,6 @@ function loadImage(ax, b_detectWalls, b_addPoint)
     b_addPoint.Enable = 'on';
 end
 
-% Function to detect walls in the image
 % Function to detect walls in the image and solidify them
 function detectWalls(ax)
     % Retrieve the image from the axes
@@ -189,59 +222,76 @@ function addPoint(src, event)
 
 end
 
-% Callback Functions for unit conversion
-function unitConversionRAKR(dd, efR)
-    switch dd.Value
-        case 'μGym^2/MBqh'
-            efR.Value = efR.Value; % Assuming μGym^2/MBqh is the base unit, no conversion needed
-        case 'mGym^2/MBqh'
-            efR.Value = efR.Value * 1000;
-        case 'Gym^2/MBqh'
-            efR.Value = efR.Value * 1e6;
-        otherwise
-    end
-end
-
-function unitConversionActivity(dd, efA)
-    switch dd.Value
-        case 'Bq'
-            efA.Value = efA.Value; % Assuming Bq is the base unit, no conversion needed
-        case 'kBq'
-            efA.Value = efA.Value * 1e3;
+% Callback functions for unit conversion
+function convertActivityUnit(unitDropdown, activityEditField)
+    switch unitDropdown.Value
         case 'MBq'
-            efA.Value = efA.Value * 1e6;
+            % Base unit
+        case 'kBq'
+            activityEditField.Value = activityEditField.Value * 1e3;
         case 'GBq'
-            efA.Value = efA.Value * 1e9;
-        otherwise
+            activityEditField.Value = activityEditField.Value * 1e-3;
+        case 'Bq'
+            activityEditField.Value = activityEditField.Value * 1e6;
     end
 end
 
-function unitConversionDuration(dd, efD)
-    switch dd.Value
+function convertDurationUnit(unitDropdown, durationEditField)
+    switch unitDropdown.Value
         case 'hours'
-            efD.Value = efD.Value; % Assuming seconds is the base unit, no conversion needed
+            % Base unit
         case 'minutes'
-            efD.Value = efD.Value * 60;
+            durationEditField.Value = durationEditField.Value * 60;
         case 'seconds'
-            efD.Value = efD.Value * 3600;
-        otherwise
+            durationEditField.Value = durationEditField.Value * 3600;
     end
 end
 
-function unitConversionDesignLimit(dd, efP)
-    switch dd.Value
+function convertTreatmentsUnit(unitDropdown, treatmentsEditField)
+    % Placeholder for treatment unit conversion if needed
+end
+
+function setDesignLimit(areaDropdown, designLimitEditField)
+    switch areaDropdown.Value
         case "Controlled Area"
-            efP.Value = 200;
+            designLimitEditField.Value = 200;
         case "Uncontrolled Area"
-            efP.Value = 60;
+            designLimitEditField.Value = 60;
         case "Public Area"
-            efP.Value = 6;
-        otherwise
+            designLimitEditField.Value = 6;
     end
 end
 
-%Callback Function for Workload and Transmission Factor Calculation
-function calculateValue(efR, efA, efD, efTr, efw, efP, efd, efT, efB)
-    efw.Value = efR.Value * efA.Value * efD.Value * efTr.Value;
-    efB.Value = (efP.Value*efd.Value^2)/(efw.Value*efT.Value);
+% Update source data based on selected source
+function updateSourceData(sourceDropdown, sourceData)
+    selectedSource = sourceData.(sourceDropdown.Value);
+    % Additional functionality when source changes can be added here
+end
+
+% Callback function for shielding thickness calculation
+function calculateShieldingThickness(sourceDropdown, activityEditField, durationEditField, treatmentsEditField, workloadValue, designLimitEditField, distanceEditField, occupationFactorEditField, transmissionFactorValue, thicknessValues, sourceData)
+    selectedSource = sourceData.(sourceDropdown.Value);
+    workload = selectedSource.RAKR * activityEditField.Value * durationEditField.Value * treatmentsEditField.Value;
+    workloadValue.Text = sprintf('%.2f', workload);
+    transmissionFactor = (designLimitEditField.Value * distanceEditField.Value^2) / (workload * occupationFactorEditField.Value);
+    transmissionFactorValue.Text = sprintf('%.2f', transmissionFactor);
+
+    % Calculate the attenuation factor
+    attenuationFactor = log10(1 / transmissionFactor);
+
+    % Calculate and display thickness for each material
+    materials = fieldnames(selectedSource.TVLe);
+    for i = 1:length(materials)
+        material = materials{i};
+        TVLe = selectedSource.TVLe.(material);
+        TVL1 = selectedSource.TVL1.(material);
+        
+        if isempty(TVL1)
+            TVL1 = 0; % Set TVL1 to zero if not provided
+        end
+        
+        % Calculate thickness: thickness = TVL1 + (attenuationFactor - 1) * TVLe
+        thickness = TVL1 + (attenuationFactor - 1) * TVLe;
+        thicknessValues.(material).Text = sprintf('%.2f', thickness);
+    end
 end
