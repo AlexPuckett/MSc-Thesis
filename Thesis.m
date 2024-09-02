@@ -265,7 +265,6 @@ end
 % Update source data based on selected source
 function updateSourceData(sourceDropdown, sourceData)
     selectedSource = sourceData.(sourceDropdown.Value);
-    % Additional functionality when source changes can be added here
 end
 
 % Callback function for shielding thickness calculation

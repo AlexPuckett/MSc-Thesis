@@ -39,55 +39,58 @@ sourceDropdown = uidropdown(shieldingTab, "Items", fieldnames(sourceData), 'Posi
 sourceDropdown.ValueChangedFcn = @(dd, event) updateSourceData(dd, sourceData);
 
 % Numeric edit fields for workload calculations
-activityEditField = uieditfield(shieldingTab, 'numeric', 'Position', [200 525 50 22], "ValueDisplayFormat", "%.2f");
-durationEditField = uieditfield(shieldingTab, 'numeric', 'Position', [200 500 50 22], "ValueDisplayFormat", "%.2f");
-treatmentsEditField = uieditfield(shieldingTab, 'numeric', 'Position', [200 475 50 22], "ValueDisplayFormat", "%.2f");
+activityEditField = uieditfield(shieldingTab, 'numeric', 'Position', [200, 525, 50, 22], "ValueDisplayFormat", "%.2f");
+durationEditField = uieditfield(shieldingTab, 'numeric', 'Position', [200, 475, 50, 22], "ValueDisplayFormat", "%.2f");
+treatmentsEditField = uieditfield(shieldingTab, 'numeric', 'Position', [200, 450, 50, 22], "ValueDisplayFormat", "%.2f");
+numberSourcesEditField = uieditfield(shieldingTab,'numeric', 'Position',[200, 500, 50, 22], "ValueDisplayFormat", "%.2f");
 
 % Numeric edit fields for transition factor calculations
-designLimitEditField = uieditfield(shieldingTab, 'numeric', 'Position', [200 450 50 22], "ValueDisplayFormat", "%.2f");
-distanceEditField = uieditfield(shieldingTab, 'numeric', 'Position', [200 425 50 22], "ValueDisplayFormat", "%.2f");
-occupationFactorEditField = uieditfield(shieldingTab, 'numeric', 'Position', [200 400 50 22], "ValueDisplayFormat", "%.2f");
-workloadValue = uilabel(shieldingTab, 'Text', '-', 'Position', [170, 350, 50, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
-transmissionFactorValue = uilabel(shieldingTab, 'Text', '-', 'Position', [170, 325, 50, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+designLimitEditField = uieditfield(shieldingTab, 'numeric', 'Position', [200, 425, 50, 22], "ValueDisplayFormat", "%.2f");
+distanceEditField = uieditfield(shieldingTab, 'numeric', 'Position', [200, 400, 50, 22], "ValueDisplayFormat", "%.2f");
+occupationFactorEditField = uieditfield(shieldingTab, 'numeric', 'Position', [200 375 50 22], "ValueDisplayFormat", "%.2f");
+workloadValue = uilabel(shieldingTab, 'Text', '-', 'Position', [170, 325, 50, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+transmissionFactorValue = uilabel(shieldingTab, 'Text', '-', 'Position', [170, 300, 50, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
 
 % Labels for workload calculations
-activityLabel = uilabel(shieldingTab, 'Text', 'Activity', 'Position', [20, 525, 100, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+activityLabel = uilabel(shieldingTab, 'Text', 'Activity', 'Position', [20, 525, 50, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
 activityUnitDropdown = uidropdown(shieldingTab, "Items", ["MBq", "Bq", "kBq", "GBq"], 'Position', [120, 525, 70, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
 
-durationLabel = uilabel(shieldingTab, 'Text', 'Duration', 'Position', [20, 500, 50, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
-durationUnitDropdown = uidropdown(shieldingTab, "Items", ["hours", "minutes", "seconds"], 'Position', [120, 500, 70, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+durationLabel = uilabel(shieldingTab, 'Text', 'Duration', 'Position', [20, 475, 50, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+durationUnitDropdown = uidropdown(shieldingTab, "Items", ["hours", "minutes", "seconds"], 'Position', [120, 475, 70, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
 
-treatmentsLabel = uilabel(shieldingTab, 'Text', 'Treatments', 'Position', [20, 475, 120, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
-treatmentsUnitDropdown = uidropdown(shieldingTab, "Items", ["per week"], 'Position', [120, 475, 70, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+treatmentsLabel = uilabel(shieldingTab, 'Text', 'Treatments', 'Position', [20, 450, 120, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+treatmentsUnitDropdown = uidropdown(shieldingTab, "Items", ["per week"], 'Position', [120, 450, 70, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+
+numberSourcesLabel = uilabel(shieldingTab, 'Text', 'Sources', 'Position', [20, 500, 50, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
 
 % Labels for transition factor calculations
-designLimitLabel = uilabel(shieldingTab, 'Text', 'Design Limit [μGy]', 'Position', [20, 450, 125, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
-designLimitAreaDropdown = uidropdown(shieldingTab, "Items", ["Controlled Area", "Uncontrolled Area", "Public Area"], 'Position', [120, 450, 70, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+designLimitLabel = uilabel(shieldingTab, 'Text', 'Design Limit [μGy]', 'Position', [20, 425, 125, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+designLimitAreaDropdown = uidropdown(shieldingTab, "Items", ["Controlled Area", "Uncontrolled Area", "Public Area"], 'Position', [120, 425, 70, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
 
-distanceLabel = uilabel(shieldingTab, 'Text', 'Distance', 'Position', [20, 425, 125, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
-distanceUnitDropdown = uidropdown(shieldingTab, "Items", ["meters"], 'Position', [120, 425, 70, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+distanceLabel = uilabel(shieldingTab, 'Text', 'Distance', 'Position', [20, 400, 125, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+distanceUnitDropdown = uidropdown(shieldingTab, "Items", ["meters"], 'Position', [120, 400, 70, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
 
-occupationFactorLabel = uilabel(shieldingTab, 'Text', 'Occupation Factor', 'Position', [20, 400, 125, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+occupationFactorLabel = uilabel(shieldingTab, 'Text', 'Occupation Factor', 'Position', [20, 375, 125, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
 
-workloadLabel = uilabel(shieldingTab, 'Text', 'Workload [μGym^2/week]', 'Position', [20, 350, 125, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+workloadLabel = uilabel(shieldingTab, 'Text', 'Workload [μGym^2/week]', 'Position', [20, 325, 125, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
 
-transmissionFactorLabel = uilabel(shieldingTab, 'Text', 'Transmission Factor', 'Position', [20, 325, 140, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+transmissionFactorLabel = uilabel(shieldingTab, 'Text', 'Transmission Factor', 'Position', [20, 300, 140, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
 
 % Labels and fields to display calculated thickness
 thicknessLabels = struct();
-thicknessLabels.Lead = uilabel(shieldingTab, 'Text', 'Lead Thickness [mm]:', 'Position', [20, 300, 150, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
-thicknessLabels.Steel = uilabel(shieldingTab, 'Text', 'Steel Thickness [mm]:', 'Position', [20, 275, 150, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
-thicknessLabels.Concrete = uilabel(shieldingTab, 'Text', 'Concrete Thickness [mm]:', 'Position', [20, 250, 150, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+thicknessLabels.Lead = uilabel(shieldingTab, 'Text', 'Lead Thickness [mm]:', 'Position', [20, 275, 150, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+thicknessLabels.Steel = uilabel(shieldingTab, 'Text', 'Steel Thickness [mm]:', 'Position', [20, 250, 150, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+thicknessLabels.Concrete = uilabel(shieldingTab, 'Text', 'Concrete Thickness [mm]:', 'Position', [20, 225, 150, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
 
 % Labels to display calculated values
 thicknessValues = struct();
-thicknessValues.Lead = uilabel(shieldingTab, 'Text', '-', 'Position', [170, 300, 100, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
-thicknessValues.Steel = uilabel(shieldingTab, 'Text', '-', 'Position', [170, 275, 100, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
-thicknessValues.Concrete = uilabel(shieldingTab, 'Text', '-', 'Position', [170, 250, 100, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+thicknessValues.Lead = uilabel(shieldingTab, 'Text', '-', 'Position', [170, 275, 100, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+thicknessValues.Steel = uilabel(shieldingTab, 'Text', '-', 'Position', [170, 250, 100, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+thicknessValues.Concrete = uilabel(shieldingTab, 'Text', '-', 'Position', [170, 225, 100, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
 
 % Button for calculation
-calcButton = uibutton(shieldingTab, 'Position', [20 375 140 22], 'Text', 'Calculate');
-calcButton.ButtonPushedFcn = @(btn, event) calculateShieldingThickness(sourceDropdown, activityEditField, durationEditField, treatmentsEditField, workloadValue, designLimitEditField, distanceEditField, occupationFactorEditField, transmissionFactorValue, thicknessValues, sourceData);
+calcButton = uibutton(shieldingTab, 'Position', [20 350 140 22], 'Text', 'Calculate');
+calcButton.ButtonPushedFcn = @(btn, event) calculateShieldingThickness(sourceDropdown, activityEditField, durationEditField, treatmentsEditField, workloadValue, designLimitEditField, distanceEditField, occupationFactorEditField, transmissionFactorValue, thicknessValues, numberSourcesEditField, sourceData);
 
 % Assigning callbacks for dropdowns
 activityUnitDropdown.ValueChangedFcn = @(dd, event) convertActivityUnit(dd, activityEditField);
@@ -101,11 +104,11 @@ function convertActivityUnit(unitDropdown, activityEditField)
         case 'MBq'
             % Base unit
         case 'kBq'
-            activityEditField.Value = activityEditField.Value * 1e3;
-        case 'GBq'
             activityEditField.Value = activityEditField.Value * 1e-3;
+        case 'GBq'
+            activityEditField.Value = activityEditField.Value * 1e3;
         case 'Bq'
-            activityEditField.Value = activityEditField.Value * 1e6;
+            activityEditField.Value = activityEditField.Value * 1e-6;
     end
 end
 
@@ -138,16 +141,15 @@ end
 % Update source data based on selected source
 function updateSourceData(sourceDropdown, sourceData)
     selectedSource = sourceData.(sourceDropdown.Value);
-    % Additional functionality when source changes can be added here
 end
 
 % Callback function for shielding thickness calculation
-function calculateShieldingThickness(sourceDropdown, activityEditField, durationEditField, treatmentsEditField, workloadValue, designLimitEditField, distanceEditField, occupationFactorEditField, transmissionFactorValue, thicknessValues, sourceData)
+function calculateShieldingThickness(sourceDropdown, activityEditField, durationEditField, treatmentsEditField, workloadValue, designLimitEditField, distanceEditField, occupationFactorEditField, transmissionFactorValue, thicknessValues, numberSourcesEditField, sourceData)
     selectedSource = sourceData.(sourceDropdown.Value);
-    workload = selectedSource.RAKR * activityEditField.Value * durationEditField.Value * treatmentsEditField.Value;
+    workload = selectedSource.RAKR * activityEditField.Value * numberSourcesEditField.Value * durationEditField.Value * treatmentsEditField.Value;
     workloadValue.Text = sprintf('%.2f', workload);
     transmissionFactor = (designLimitEditField.Value * distanceEditField.Value^2) / (workload * occupationFactorEditField.Value);
-    transmissionFactorValue.Text = sprintf('%.2f', transmissionFactor);
+    transmissionFactorValue.Text = sprintf('%.2e', transmissionFactor);
 
     % Calculate the attenuation factor
     attenuationFactor = log10(1 / transmissionFactor);
