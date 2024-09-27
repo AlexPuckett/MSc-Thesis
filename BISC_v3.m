@@ -15,34 +15,40 @@ shieldingTab.Scrollable = "on";
 % Source data
 sourceData = struct();
 sourceData.Ir192.RAKR = 0.111;
+sourceData.Ir192.E = 1.378; %MeV gamma ray
 sourceData.Ir192.TVLe = struct('Lead', 16, 'Steel', 43, 'Concrete', 152);
 sourceData.Ir192.TVL1 = struct('Lead', [], 'Steel', 49, 'Concrete', []);
 
 sourceData.Co60.RAKR = 0.308;
+sourceData.Co60.E = 1.33;
 sourceData.Co60.TVLe = struct('Lead', 41, 'Steel', 71, 'Concrete', 218);
 sourceData.Co60.TVL1 = struct('Lead', [], 'Steel', 87, 'Concrete', 245);
 
 sourceData.I125.RAKR = 0.034;
+sourceData.I125.E = 0.35;
 sourceData.I125.TVLe = struct('Lead', 0.1, 'Steel', [], 'Concrete', []);
 sourceData.I125.TVL1 = struct('Lead', [], 'Steel', [], 'Concrete', []);
 
 sourceData.Cs137.RAKR = 0.077;
+sourceData.Cs137.E = 0.662;
 sourceData.Cs137.TVLe = struct('Lead', 22, 'Steel', 53, 'Concrete', 175);
 sourceData.Cs137.TVL1 = struct('Lead', [], 'Steel', 69, 'Concrete', []);
 
 sourceData.Au198.RAKR = 0.056;
+sourceData.Au198.E = 0.416;
 sourceData.Au198.TVLe = struct('Lead', 11, 'Steel', [], 'Concrete', 142);
 sourceData.Au198.TVL1 = struct('Lead', [], 'Steel', [], 'Concrete', []);
 
 sourceData.Ra226.RAKR = 0.195;
+sourceData.Ra226.E = 0.440;
 sourceData.Ra226.TVLe = struct('Lead', 45, 'Steel', 76, 'Concrete', 240);
 sourceData.Ra226.TVL1 = struct('Lead', [], 'Steel', 86, 'Concrete', []);
 
-%Densities
+%Densities kg/mm3
 density = struct();
-density.Concrete = 2.5e-6;
-density.Steel = 7.8e-6;
-density.Lead = 1.11e-5;
+density.Concrete = 2.4e-6;
+density.Steel = 7.9e-6;
+density.Lead = 1.13e-5;
 
 % Dropdown for sources
 sourceLabel = uilabel(shieldingTab, 'Text', 'Source', 'Position', [20, 550, 100, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
@@ -94,24 +100,36 @@ PriceEditField.Concrete = uieditfield(shieldingTab, 'numeric', 'Position', [910,
 PriceEditField.Steel = uieditfield(shieldingTab, 'numeric', 'Position', [910, 500, 50, 22], "ValueDisplayFormat", "%.2f");
 PriceEditField.Lead = uieditfield(shieldingTab, 'numeric', 'Position', [910, 475, 50, 22], "ValueDisplayFormat", "%.2f");
 
-tableData = cell(3, 12);  % Cell array for the table data
+tableData = cell(3, 13);  % Cell array for the table data
 
-% Column headers for the table
-columnNames = cell(1,12);
+% Column headers for the result table
+columnNames = cell(1,13);
+columnNames{1} = 'Materials';
 for i = 1:6
-    columnNames{2*i-1} = ['Thickness' num2str(i)];
-    columnNames{2*i} = ['Cost' num2str(i)];
+    columnNames{2*i} = ['Thickness' num2str(i)];
+    columnNames{2*i+1} = ['Cost' num2str(i)];
 end
+
 % Create the table in the UI (positioned at the bottom for displaying results)
-resultTable = uitable(shieldingTab, 'Data', tableData, ...
-    'ColumnName', columnNames, ...
-    'Position', [20, 200, 1018, 98.70], ... % Adjust position and size as needed
-    'ColumnWidth', repmat({80}, 1, 12), ... % Set uniform column widths
-    'RowName', {'Lead', 'Steel', 'Concrete'});  % Row names for materials
+resultTable = uitable(shieldingTab, 'Data', tableData, 'ColumnName', columnNames, 'Position', [15, 200, 1030, 98.5], 'ColumnWidth', repmat({76}, 1, 12));
+
+shieldData = cell(4,7);
+
+%Column headers for shielding table
+columnNames1 = cell(1,7);
+columnNames1{1} = 'Shielding';
+for i = 1:6
+    columnNames1{i+1} = ['Distance' num2str(i)];
+end
+shieldTable = uitable(shieldingTab, 'Data', shieldData, 'ColumnName', columnNames1, 'Position', [250, 50, 575, 122], 'ColumnWidth', repmat({76}, 1, 12));
+
+% Adding the Save button for exporting table data to an Excel file
+saveButton = uibutton(shieldingTab, 'Position', [810, 420, 100, 22], 'Text', 'Save to Excel');
+saveButton.ButtonPushedFcn = @(btn, event) saveToExcel(resultTable, shieldTable);
 
 % Calculating shielding thickness and updating the table
 calcButton = uibutton(shieldingTab, 'Position', [810, 450, 100, 22], 'Text', 'Calculate');
-calcButton.ButtonPushedFcn = @(btn, event) calculateShieldingThickness(sourceDropdown, activityEditField, durationEditField, treatmentsEditField, workloadValue, designLimitEditField, distanceEditField, occupationFactorEditField, numberSourcesEditField, sourceData, density, PriceEditField, resultTable, tableData);
+calcButton.ButtonPushedFcn = @(btn, event) calculateShieldingThickness(sourceDropdown, activityEditField, durationEditField, treatmentsEditField, workloadValue, designLimitEditField, distanceEditField, occupationFactorEditField, numberSourcesEditField, sourceData, density, PriceEditField, resultTable, tableData, shieldTable, shieldData);
 
 % Function to update designLimitEditField based on dropdown selection
 function setDesignLimit(dd, designLimitEditField)
@@ -133,7 +151,7 @@ selectedSource = sourceData.(sourceDropdown.Value);
 end
 
 % Function to calculate shielding thickness and update the table
-function calculateShieldingThickness(sourceDropdown, activityEditField, durationEditField, treatmentsEditField, workloadValue, designLimitEditField, distanceEditField, occupationFactorEditField, numberSourcesEditField, sourceData, density, PriceEditField, resultTable, tableData)
+function calculateShieldingThickness(sourceDropdown, activityEditField, durationEditField, treatmentsEditField, workloadValue, designLimitEditField, distanceEditField, occupationFactorEditField, numberSourcesEditField, sourceData, density, PriceEditField, resultTable, tableData, shieldTable, shieldData)
 % Get the selected source data
 selectedSource = sourceData.(sourceDropdown.Value);
 
@@ -146,11 +164,16 @@ transmissionFactor = zeros(1,6);
 attenuationFactor = zeros(1,6);
 thickness = zeros(3,6);  % 3 materials (Lead, Steel, Concrete), 6 distances
 cost = zeros(3,6);       % Same size for cost
+InIntensity = zeros(1,6);
+Intensity = zeros(3,6);
 
 % Loop through the 6 distances and calculate thickness and cost
 for i = 1:6
     transmissionFactor(i) = (designLimitEditField{i}.Value * distanceEditField{i}.Value^2) / (workload * occupationFactorEditField{i}.Value);
     attenuationFactor(i) = log10(1 / transmissionFactor(i));
+
+    %Calculate initial intensity
+    InIntensity(i) = (activityEditField.Value * selectedSource.E * 1.6*10^-13) / (4*pi*distanceEditField{i}.Value^2);
 
     % For each material, calculate thickness and cost
     materials = fieldnames(selectedSource.TVLe);  % Lead, Steel, Concrete
@@ -166,21 +189,52 @@ for i = 1:6
         % Calculate thickness: thickness = TVL1 + (attenuationFactor - 1) * TVLe
         thickness(j,i) = TVL1 + (attenuationFactor(i)-1)*TVLe;
 
-
         % Calculate cost based on material density and price per kg
         % Assuming thickness is in mm, convert to meters for volume calculation
-        thickness_m = thickness(j,i);  % Convert mm to meters
+        thickness_m = ceil(thickness(j,i));  % Convert mm to meters
         volume = thickness_m^3;  % Volume in m^3
         mass = density.(material) * volume;  % Mass in kg (assuming density units are consistent)
         cost(j,i) = PriceEditField.(material).Value * mass;
 
+        %Calculate Intenisty attenuation
+        Intensity(j, i) = InIntensity(i)*exp(-attenuationFactor(i)*thickness(j,i));
+
         % Update the table data for the current material and distance
-        tableData{j,2*i-1} = sprintf('%.2f mm', thickness(j,i));  % Thickness in mm
-        tableData{j, 2*i} = sprintf('€ %.2f', cost(j,i));        % Cost in EUR
+        tableData{1,1} = sprintf('Lead');
+        tableData{2,1} = sprintf('Steel');
+        tableData{3,1} = sprintf('Concrete');
+        tableData{j,2*i} = sprintf('%.2f mm', ceil(thickness(j,i)));  % Thickness in mm
+        tableData{j, 2*i+1} = sprintf('€ %.2f', cost(j,i));        % Cost in EUR
+
+        %Update the shield data for material and distance
+        shieldData{1,1} = sprintf('No Shielding');
+        shieldData{2,1} = sprintf('Lead Shield');
+        shieldData{3,1} = sprintf('Steel Shield');
+        shieldData{4,1} = sprintf('Concrete Shield');
+        shieldData{1,i+1} = sprintf('%.2e', InIntensity(i));
+        shieldData{j+1,i+1} = sprintf('%.2e', Intensity(j,i));
 
     end
 end
 
 % Update the UITable with the new data
 resultTable.Data = tableData;
+shieldTable.Data = shieldData;
+
+end
+
+% Function to save table data to Excel
+function saveToExcel(resultTable, shieldTable)
+
+    % Convert cell array to table format for export
+    exportTable = cell2table(resultTable.Data, 'VariableNames', resultTable.ColumnName);
+    exportTable1 = cell2table(shieldTable.Data, 'VariableNames', shieldTable.ColumnName);
+
+    % Define the Excel filename
+    excelFileName = 'BISC.xlsx';
+    
+    % Write the table to the Excel file
+    writetable(exportTable, excelFileName, 'Sheet', 1, 'Range', 'A1');
+    writetable(exportTable1,excelFileName, 'Sheet', 1, 'Range', 'A6');
+    
 end
