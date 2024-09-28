@@ -16,37 +16,55 @@ shieldingTab.Scrollable = "on";
 sourceData = struct();
 sourceData.Ir192.RAKR = 0.111;
 sourceData.Ir192.E = 1.378; %MeV gamma ray
+sourceData.Ir192.Lead = 5500; %mm2/kg
+sourceData.Ir192.Steel = 5109;
+sourceData.Ir192.Concrete = 5144;
 sourceData.Ir192.TVLe = struct('Lead', 16, 'Steel', 43, 'Concrete', 152);
 sourceData.Ir192.TVL1 = struct('Lead', [], 'Steel', 49, 'Concrete', []);
 
 sourceData.Co60.RAKR = 0.308;
 sourceData.Co60.E = 1.33;
+sourceData.Co60.Lead = 5700;
+sourceData.Co60.Steel = 5200;
+sourceData.Co60.Concrete = 52400;
 sourceData.Co60.TVLe = struct('Lead', 41, 'Steel', 71, 'Concrete', 218);
 sourceData.Co60.TVL1 = struct('Lead', [], 'Steel', 87, 'Concrete', 245);
 
 sourceData.I125.RAKR = 0.034;
 sourceData.I125.E = 0.35;
+sourceData.I125.Lead = 31800;
+sourceData.I125.Steel = 10195;
+sourceData.I125.Concrete = 13000;
 sourceData.I125.TVLe = struct('Lead', 0.1, 'Steel', [], 'Concrete', []);
 sourceData.I125.TVL1 = struct('Lead', [], 'Steel', [], 'Concrete', []);
 
 sourceData.Cs137.RAKR = 0.077;
 sourceData.Cs137.E = 0.662;
+sourceData.Cs137.Lead = 11400;
+sourceData.Cs137.Steel = 7390;
+sourceData.Cs137.Concrete = 7844;
 sourceData.Cs137.TVLe = struct('Lead', 22, 'Steel', 53, 'Concrete', 175);
 sourceData.Cs137.TVL1 = struct('Lead', [], 'Steel', 69, 'Concrete', []);
 
 sourceData.Au198.RAKR = 0.056;
 sourceData.Au198.E = 0.416;
+sourceData.Au198.Lead = 10100;
+sourceData.Au198.Steel = 9240;
+sourceData.Au198.Concrete = 10730;
 sourceData.Au198.TVLe = struct('Lead', 11, 'Steel', [], 'Concrete', 142);
 sourceData.Au198.TVL1 = struct('Lead', [], 'Steel', [], 'Concrete', []);
 
 sourceData.Ra226.RAKR = 0.195;
 sourceData.Ra226.E = 0.440;
+sourceData.Ra226.Lead = 20400;
+sourceData.Ra226.Steel = 9000;
+sourceData.Ra226.Concrete = 10324;
 sourceData.Ra226.TVLe = struct('Lead', 45, 'Steel', 76, 'Concrete', 240);
 sourceData.Ra226.TVL1 = struct('Lead', [], 'Steel', 86, 'Concrete', []);
 
 %Densities kg/mm3
 density = struct();
-density.Concrete = 2.4e-6;
+density.Concrete = 4.2e-6;
 density.Steel = 7.9e-6;
 density.Lead = 1.13e-5;
 
@@ -87,8 +105,8 @@ for i = 1:6
     designLimitAreaDropdown{i}.ValueChangedFcn = @(dd, event) setDesignLimit(dd, designLimitEditField{i});
 end
 
-workloadLabel = uilabel(shieldingTab, 'Text', 'Workload [μGym^2/week]', 'Position', [20, 375, 175, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
-workloadValue = uilabel(shieldingTab, 'Text', '-', 'Position', [200, 375, 100, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+workloadLabel = uilabel(shieldingTab, 'Text', 'Workload', 'Position', [20, 375, 175, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+workloadValue = uilabel(shieldingTab, 'Text', '-', 'Position', [80, 375, 100, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
 
 % Labels and Edit Fields for Material Prices
 ConcretePriceLabel = uilabel(shieldingTab, "Text", "Concrete Price [Eu/Kg]", "Position", [795, 525, 110, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
@@ -113,7 +131,7 @@ end
 % Create the table in the UI (positioned at the bottom for displaying results)
 resultTable = uitable(shieldingTab, 'Data', tableData, 'ColumnName', columnNames, 'Position', [15, 200, 1030, 98.5], 'ColumnWidth', repmat({76}, 1, 12));
 
-shieldData = cell(4,7);
+shieldData = cell(4,7); % Cell array for the shielding data
 
 %Column headers for shielding table
 columnNames1 = cell(1,7);
@@ -157,7 +175,7 @@ selectedSource = sourceData.(sourceDropdown.Value);
 
 % Calculate the workload
 workload = selectedSource.RAKR * activityEditField.Value * numberSourcesEditField.Value * durationEditField.Value * treatmentsEditField.Value;
-workloadValue.Text = sprintf('%.2f', workload);
+workloadValue.Text = sprintf('%.2f μGym^2/week', workload);
 
 % Pre-allocate arrays to store thickness and cost results
 transmissionFactor = zeros(1,6);
@@ -197,7 +215,7 @@ for i = 1:6
         cost(j,i) = PriceEditField.(material).Value * mass;
 
         %Calculate Intenisty attenuation
-        Intensity(j, i) = InIntensity(i)*exp(-attenuationFactor(i)*thickness(j,i));
+        Intensity(j, i) = InIntensity(i)*exp(-selectedSource.(material)*density.(material)*thickness(j,i));
 
         % Update the table data for the current material and distance
         tableData{1,1} = sprintf('Lead');
@@ -226,15 +244,24 @@ end
 % Function to save table data to Excel
 function saveToExcel(resultTable, shieldTable)
 
+     % Open a dialog for the user to select a directory
+    folderName = uigetdir('', 'Select Folder to Save Excel File');
+
+    % Check if the user selected a folder (not canceled)
+    if folderName == 0
+        return; % User canceled the operation
+    end
+
+    % Define the Excel filename
+    excelFileName = fullfile(folderName, 'BISC.xlsx');
+
     % Convert cell array to table format for export
     exportTable = cell2table(resultTable.Data, 'VariableNames', resultTable.ColumnName);
     exportTable1 = cell2table(shieldTable.Data, 'VariableNames', shieldTable.ColumnName);
-
-    % Define the Excel filename
-    excelFileName = 'BISC.xlsx';
     
     % Write the table to the Excel file
     writetable(exportTable, excelFileName, 'Sheet', 1, 'Range', 'A1');
     writetable(exportTable1,excelFileName, 'Sheet', 1, 'Range', 'A6');
     
 end
+
