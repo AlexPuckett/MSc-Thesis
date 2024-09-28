@@ -128,7 +128,7 @@ for i = 1:6
     columnNames{2*i+1} = ['Cost' num2str(i)];
 end
 
-% Create the table in the UI (positioned at the bottom for displaying results)
+% Creating the table in the UI
 resultTable = uitable(shieldingTab, 'Data', tableData, 'ColumnName', columnNames, 'Position', [15, 200, 1030, 98.5], 'ColumnWidth', repmat({76}, 1, 12));
 
 shieldData = cell(4,7); % Cell array for the shielding data
@@ -143,11 +143,11 @@ shieldTable = uitable(shieldingTab, 'Data', shieldData, 'ColumnName', columnName
 
 % Adding the Save button for exporting table data to an Excel file
 saveButton = uibutton(shieldingTab, 'Position', [810, 420, 100, 22], 'Text', 'Save to Excel');
-saveButton.ButtonPushedFcn = @(btn, event) saveToExcel(resultTable, shieldTable);
+saveButton.ButtonPushedFcn = @(btn, event) saveToExcel(resultTable, shieldTable, mainFig);
 
 % Calculating shielding thickness and updating the table
 calcButton = uibutton(shieldingTab, 'Position', [810, 450, 100, 22], 'Text', 'Calculate');
-calcButton.ButtonPushedFcn = @(btn, event) calculateShieldingThickness(sourceDropdown, activityEditField, durationEditField, treatmentsEditField, workloadValue, designLimitEditField, distanceEditField, occupationFactorEditField, numberSourcesEditField, sourceData, density, PriceEditField, resultTable, tableData, shieldTable, shieldData);
+calcButton.ButtonPushedFcn = @(btn, event) calculateShieldingThickness(sourceDropdown, activityEditField, durationEditField, treatmentsEditField, workloadValue, designLimitEditField, distanceEditField, occupationFactorEditField, numberSourcesEditField, sourceData, density, PriceEditField, resultTable, tableData, shieldTable, shieldData, mainFig);
 
 % Function to update designLimitEditField based on dropdown selection
 function setDesignLimit(dd, designLimitEditField)
@@ -169,12 +169,24 @@ selectedSource = sourceData.(sourceDropdown.Value);
 end
 
 % Function to calculate shielding thickness and update the table
-function calculateShieldingThickness(sourceDropdown, activityEditField, durationEditField, treatmentsEditField, workloadValue, designLimitEditField, distanceEditField, occupationFactorEditField, numberSourcesEditField, sourceData, density, PriceEditField, resultTable, tableData, shieldTable, shieldData)
+function calculateShieldingThickness(sourceDropdown, activityEditField, durationEditField, treatmentsEditField, workloadValue, designLimitEditField, distanceEditField, occupationFactorEditField, numberSourcesEditField, sourceData, density, PriceEditField, resultTable, tableData, shieldTable, shieldData, mainFig)
+
 % Get the selected source data
 selectedSource = sourceData.(sourceDropdown.Value);
 
+% Check for negative values in input fields
+if any([activityEditField.Value, numberSourcesEditField.Value, durationEditField.Value, treatmentsEditField.Value] < 0)
+    uialert(mainFig, 'Input values cannot be negative.', 'Input Error');
+    return; % Exit the function if negative values are found
+end
+
 % Calculate the workload
 workload = selectedSource.RAKR * activityEditField.Value * numberSourcesEditField.Value * durationEditField.Value * treatmentsEditField.Value;
+
+% Set workload to 0 if it is negative
+if workload < 0
+    workload = 0;
+end
 workloadValue.Text = sprintf('%.2f μGym^2/week', workload);
 
 % Pre-allocate arrays to store thickness and cost results
@@ -185,15 +197,32 @@ cost = zeros(3,6);       % Same size for cost
 InIntensity = zeros(1,6);
 Intensity = zeros(3,6);
 
-% Loop through the 6 distances and calculate thickness and cost
+% Loop through the 6 distances and calculate thickness, cost and Intensities
 for i = 1:6
+
+    if any([designLimitEditField{i}.Value, distanceEditField{i}.Value, occupationFactorEditField{i}.Value] < 0)
+    uialert(mainFig, 'Input values cannot be negative.', 'Input Error');
+    return; % Exit the function if negative values are found
+    end
+
     transmissionFactor(i) = (designLimitEditField{i}.Value * distanceEditField{i}.Value^2) / (workload * occupationFactorEditField{i}.Value);
+
+    % Check if transmissionFactor is valid. if not, set to 0
+    if isnan(transmissionFactor(i)) || transmissionFactor(i) == Inf || transmissionFactor(i) == -Inf || transmissionFactor(i) < 0
+        transmissionFactor(i) = 0;
+    end
+
     attenuationFactor(i) = log10(1 / transmissionFactor(i));
 
     %Calculate initial intensity
     InIntensity(i) = (activityEditField.Value * selectedSource.E * 1.6*10^-13) / (4*pi*distanceEditField{i}.Value^2);
 
-    % For each material, calculate thickness and cost
+    % Check if InIntensity is valid. if not, set to 0
+    if isnan(InIntensity(i)) || InIntensity(i) == Inf || InIntensity(i) == -Inf
+        InIntensity(i) = 0;
+    end
+
+    % For each material, calculate thickness, cost and Intensity
     materials = fieldnames(selectedSource.TVLe);  % Lead, Steel, Concrete
     for j = 1:length(materials)
         material = materials{j};
@@ -207,30 +236,43 @@ for i = 1:6
         % Calculate thickness: thickness = TVL1 + (attenuationFactor - 1) * TVLe
         thickness(j,i) = TVL1 + (attenuationFactor(i)-1)*TVLe;
 
+        % Check if thickness is valid; if not, set to 0
+        if isnan(thickness(j,i)) || thickness(j,i) == Inf || thickness(j,i) == -Inf
+            thickness(j,i) = 0;
+        end
+
         % Calculate cost based on material density and price per kg
-        % Assuming thickness is in mm, convert to meters for volume calculation
-        thickness_m = ceil(thickness(j,i));  % Convert mm to meters
+        thickness_m = ceil(thickness(j,i)); %thickness is in mm
         volume = thickness_m^3;  % Volume in m^3
         mass = density.(material) * volume;  % Mass in kg (assuming density units are consistent)
         cost(j,i) = PriceEditField.(material).Value * mass;
 
-        %Calculate Intenisty attenuation
+        % Check if cost is valid. if not, set to 0
+        if isnan(cost(j,i)) || cost(j,i) == Inf || cost(j,i) == -Inf
+            cost(j,i) = 0;
+        end
+
+        %Calculate Intensity attenuation
         Intensity(j, i) = InIntensity(i)*exp(-selectedSource.(material)*density.(material)*thickness(j,i));
 
-        % Update the table data for the current material and distance
+        % Check if Intensity is valid. if not, set to 0
+        if isnan(Intensity(j, i)) || Intensity(j, i) == Inf || Intensity(j, i) == -Inf
+            Intensity(j, i) = 0;
+        end
+
+        % Update the table and shield data for the current material and distance
         tableData{1,1} = sprintf('Lead');
         tableData{2,1} = sprintf('Steel');
         tableData{3,1} = sprintf('Concrete');
         tableData{j,2*i} = sprintf('%.2f mm', ceil(thickness(j,i)));  % Thickness in mm
         tableData{j, 2*i+1} = sprintf('€ %.2f', cost(j,i));        % Cost in EUR
 
-        %Update the shield data for material and distance
         shieldData{1,1} = sprintf('No Shielding');
         shieldData{2,1} = sprintf('Lead Shield');
         shieldData{3,1} = sprintf('Steel Shield');
         shieldData{4,1} = sprintf('Concrete Shield');
-        shieldData{1,i+1} = sprintf('%.2e', InIntensity(i));
-        shieldData{j+1,i+1} = sprintf('%.2e', Intensity(j,i));
+        shieldData{1,i+1} = sprintf('%.2e W/m^2', InIntensity(i)); % Intensity in W/m^2 from Bq*J/m^2
+        shieldData{j+1,i+1} = sprintf('%.2e W/m^2', Intensity(j,i));
 
     end
 end
@@ -241,27 +283,29 @@ shieldTable.Data = shieldData;
 
 end
 
-% Function to save table data to Excel
-function saveToExcel(resultTable, shieldTable)
+% Function to save table and shield data to Excel
+function saveToExcel(resultTable, shieldTable, mainFig)
 
-     % Open a dialog for the user to select a directory
-    folderName = uigetdir('', 'Select Folder to Save Excel File');
+% Open a dialog for the user to select a directory
+folderName = uigetdir('', 'Select Folder to Save Excel File');
 
-    % Check if the user selected a folder (not canceled)
-    if folderName == 0
-        return; % User canceled the operation
-    end
-
-    % Define the Excel filename
-    excelFileName = fullfile(folderName, 'BISC.xlsx');
-
-    % Convert cell array to table format for export
-    exportTable = cell2table(resultTable.Data, 'VariableNames', resultTable.ColumnName);
-    exportTable1 = cell2table(shieldTable.Data, 'VariableNames', shieldTable.ColumnName);
-    
-    % Write the table to the Excel file
-    writetable(exportTable, excelFileName, 'Sheet', 1, 'Range', 'A1');
-    writetable(exportTable1,excelFileName, 'Sheet', 1, 'Range', 'A6');
-    
+% Check if the user selected a folder (not canceled)
+if folderName == 0
+    return; % User canceled the operation
 end
 
+% Define the Excel filename
+excelFileName = fullfile(folderName, 'BISC.xlsx');
+
+% Convert cell array to table format for export
+exportTable = cell2table(resultTable.Data, 'VariableNames', resultTable.ColumnName);
+exportTable1 = cell2table(shieldTable.Data, 'VariableNames', shieldTable.ColumnName);
+
+% Write the table to the Excel file
+writetable(exportTable, excelFileName, 'Sheet', 1, 'Range', 'A1');
+writetable(exportTable1,excelFileName, 'Sheet', 1, 'Range', 'A6');
+
+% Alert user of successful save
+uialert(mainFig, 'Data saved successfully!', 'Save Confirmation');
+
+end
