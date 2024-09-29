@@ -15,26 +15,26 @@ shieldingTab.Scrollable = "on";
 % Source data
 sourceData = struct();
 sourceData.Ir192.RAKR = 0.111;
-sourceData.Ir192.E = 1.378; %MeV gamma ray
-sourceData.Ir192.Lead = 5500; %mm2/kg
-sourceData.Ir192.Steel = 5109;
-sourceData.Ir192.Concrete = 5144;
+sourceData.Ir192.E = 0.37; %MeV gamma ray
+sourceData.Ir192.Lead = 28330; %mm2/kg through interpolation with values from NIST XCOM
+sourceData.Ir192.Steel = 98770;
+sourceData.Ir192.Concrete = 12108;
 sourceData.Ir192.TVLe = struct('Lead', 16, 'Steel', 43, 'Concrete', 152);
 sourceData.Ir192.TVL1 = struct('Lead', [], 'Steel', 49, 'Concrete', []);
 
 sourceData.Co60.RAKR = 0.308;
-sourceData.Co60.E = 1.33;
-sourceData.Co60.Lead = 5700;
-sourceData.Co60.Steel = 5200;
-sourceData.Co60.Concrete = 52400;
+sourceData.Co60.E = 1.25;
+sourceData.Co60.Lead = 5876;
+sourceData.Co60.Steel = 5350;
+sourceData.Co60.Concrete = 5404;
 sourceData.Co60.TVLe = struct('Lead', 41, 'Steel', 71, 'Concrete', 218);
 sourceData.Co60.TVL1 = struct('Lead', [], 'Steel', 87, 'Concrete', 245);
 
 sourceData.I125.RAKR = 0.034;
-sourceData.I125.E = 0.35;
-sourceData.I125.Lead = 31800;
-sourceData.I125.Steel = 10195;
-sourceData.I125.Concrete = 13000;
+sourceData.I125.E = 0.028;
+sourceData.I125.Lead = 415280;
+sourceData.I125.Steel = 1210880;
+sourceData.I125.Concrete = 7374480;
 sourceData.I125.TVLe = struct('Lead', 0.1, 'Steel', [], 'Concrete', []);
 sourceData.I125.TVL1 = struct('Lead', [], 'Steel', [], 'Concrete', []);
 
@@ -47,18 +47,18 @@ sourceData.Cs137.TVLe = struct('Lead', 22, 'Steel', 53, 'Concrete', 175);
 sourceData.Cs137.TVL1 = struct('Lead', [], 'Steel', 69, 'Concrete', []);
 
 sourceData.Au198.RAKR = 0.056;
-sourceData.Au198.E = 0.416;
-sourceData.Au198.Lead = 10100;
-sourceData.Au198.Steel = 9240;
-sourceData.Au198.Concrete = 10730;
+sourceData.Au198.E = 0.42;
+sourceData.Au198.Lead = 21812;
+sourceData.Au198.Steel = 9203;
+sourceData.Au198.Concrete = 10694;
 sourceData.Au198.TVLe = struct('Lead', 11, 'Steel', [], 'Concrete', 142);
 sourceData.Au198.TVL1 = struct('Lead', [], 'Steel', [], 'Concrete', []);
 
 sourceData.Ra226.RAKR = 0.195;
-sourceData.Ra226.E = 0.440;
-sourceData.Ra226.Lead = 20400;
-sourceData.Ra226.Steel = 9000;
-sourceData.Ra226.Concrete = 10324;
+sourceData.Ra226.E = 0.78;
+sourceData.Ra226.Lead = 9231;
+sourceData.Ra226.Steel = 7061.4;
+sourceData.Ra226.Concrete = 7067;
 sourceData.Ra226.TVLe = struct('Lead', 45, 'Steel', 76, 'Concrete', 240);
 sourceData.Ra226.TVL1 = struct('Lead', [], 'Steel', 86, 'Concrete', []);
 
@@ -75,13 +75,15 @@ sourceDropdown.ValueChangedFcn = @(dd, event) updateSourceData(dd, sourceData);
 
 % Labels and Edit Fields for workload calculations
 activityLabel = uilabel(shieldingTab, 'Text', 'Activity [MBq]', 'Position', [20, 525, 80, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
-durationLabel = uilabel(shieldingTab, 'Text', 'Duration [hours]', 'Position', [20, 475, 80, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
-treatmentsLabel = uilabel(shieldingTab, 'Text', 'Treatments [per week]', 'Position', [20, 450, 120, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+doseLabel = uilabel(shieldingTab, 'Text', 'Dose [Gy/pt]', 'Position', [20, 475, 80, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+rateLabel = uilabel(shieldingTab, 'Text', 'Rate [Gy/min]', 'Position', [20, 450, 80, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+treatmentsLabel = uilabel(shieldingTab, 'Text', 'Treatments [per week]', 'Position', [20, 425, 120, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
 numberSourcesLabel = uilabel(shieldingTab, 'Text', 'Sources', 'Position', [20, 500, 50, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
 
 activityEditField = uieditfield(shieldingTab, 'numeric', 'Position', [130, 525, 50, 22], "ValueDisplayFormat", "%.2f");
-durationEditField = uieditfield(shieldingTab, 'numeric', 'Position', [130, 475, 50, 22], "ValueDisplayFormat", "%.2f");
-treatmentsEditField = uieditfield(shieldingTab, 'numeric', 'Position', [130, 450, 50, 22], "ValueDisplayFormat", "%.2f");
+doseEditField = uieditfield(shieldingTab, 'numeric', 'Position', [130, 475, 50, 22], "ValueDisplayFormat", "%.2f");
+rateEditField = uieditfield(shieldingTab, 'numeric', 'Position', [130, 450, 50, 22], "ValueDisplayFormat", "%.2f");
+treatmentsEditField = uieditfield(shieldingTab, 'numeric', 'Position', [130, 425, 50, 22], "ValueDisplayFormat", "%.2f");
 numberSourcesEditField = uieditfield(shieldingTab,'numeric', 'Position',[130, 500, 50, 22], "ValueDisplayFormat", "%.2f");
 
 % Labels and Edit Fields for Transmission Factor Calculations
@@ -128,7 +130,7 @@ for i = 1:6
     columnNames{2*i+1} = ['Cost' num2str(i)];
 end
 
-% Creating the table in the UI
+% Create the table in the UI (positioned at the bottom for displaying results)
 resultTable = uitable(shieldingTab, 'Data', tableData, 'ColumnName', columnNames, 'Position', [15, 200, 1030, 98.5], 'ColumnWidth', repmat({76}, 1, 12));
 
 shieldData = cell(4,7); % Cell array for the shielding data
@@ -139,7 +141,7 @@ columnNames1{1} = 'Shielding';
 for i = 1:6
     columnNames1{i+1} = ['Distance' num2str(i)];
 end
-shieldTable = uitable(shieldingTab, 'Data', shieldData, 'ColumnName', columnNames1, 'Position', [250, 50, 575, 122], 'ColumnWidth', repmat({76}, 1, 12));
+shieldTable = uitable(shieldingTab, 'Data', shieldData, 'ColumnName', columnNames1, 'Position', [175, 50, 750, 122], 'ColumnWidth', repmat({100}, 1, 6));
 
 % Adding the Save button for exporting table data to an Excel file
 saveButton = uibutton(shieldingTab, 'Position', [810, 420, 100, 22], 'Text', 'Save to Excel');
@@ -147,7 +149,7 @@ saveButton.ButtonPushedFcn = @(btn, event) saveToExcel(resultTable, shieldTable,
 
 % Calculating shielding thickness and updating the table
 calcButton = uibutton(shieldingTab, 'Position', [810, 450, 100, 22], 'Text', 'Calculate');
-calcButton.ButtonPushedFcn = @(btn, event) calculateShieldingThickness(sourceDropdown, activityEditField, durationEditField, treatmentsEditField, workloadValue, designLimitEditField, distanceEditField, occupationFactorEditField, numberSourcesEditField, sourceData, density, PriceEditField, resultTable, tableData, shieldTable, shieldData, mainFig);
+calcButton.ButtonPushedFcn = @(btn, event) calculateShieldingThickness(sourceDropdown, activityEditField, doseEditField, rateEditField, treatmentsEditField, workloadValue, designLimitEditField, distanceEditField, occupationFactorEditField, numberSourcesEditField, sourceData, density, PriceEditField, resultTable, tableData, shieldTable, shieldData, mainFig);
 
 % Function to update designLimitEditField based on dropdown selection
 function setDesignLimit(dd, designLimitEditField)
@@ -169,19 +171,19 @@ selectedSource = sourceData.(sourceDropdown.Value);
 end
 
 % Function to calculate shielding thickness and update the table
-function calculateShieldingThickness(sourceDropdown, activityEditField, durationEditField, treatmentsEditField, workloadValue, designLimitEditField, distanceEditField, occupationFactorEditField, numberSourcesEditField, sourceData, density, PriceEditField, resultTable, tableData, shieldTable, shieldData, mainFig)
+function calculateShieldingThickness(sourceDropdown, activityEditField, doseEditField, rateEditField, treatmentsEditField, workloadValue, designLimitEditField, distanceEditField, occupationFactorEditField, numberSourcesEditField, sourceData, density, PriceEditField, resultTable, tableData, shieldTable, shieldData, mainFig)
 
 % Get the selected source data
 selectedSource = sourceData.(sourceDropdown.Value);
 
 % Check for negative values in input fields
-if any([activityEditField.Value, numberSourcesEditField.Value, durationEditField.Value, treatmentsEditField.Value] < 0)
+if any([activityEditField.Value, numberSourcesEditField.Value, doseEditField.Value, rateEditField.Value, treatmentsEditField.Value] < 0)
     uialert(mainFig, 'Input values cannot be negative.', 'Input Error');
     return; % Exit the function if negative values are found
 end
 
 % Calculate the workload
-workload = selectedSource.RAKR * activityEditField.Value * numberSourcesEditField.Value * durationEditField.Value * treatmentsEditField.Value;
+workload = selectedSource.RAKR * activityEditField.Value * numberSourcesEditField.Value * (doseEditField.Value / (rateEditField.Value * 60)) * treatmentsEditField.Value;
 
 % Set workload to 0 if it is negative
 if workload < 0
@@ -194,35 +196,21 @@ transmissionFactor = zeros(1,6);
 attenuationFactor = zeros(1,6);
 thickness = zeros(3,6);  % 3 materials (Lead, Steel, Concrete), 6 distances
 cost = zeros(3,6);       % Same size for cost
-InIntensity = zeros(1,6);
-Intensity = zeros(3,6);
+InActivity = zeros(1,6);
+Activity = zeros(3,6);
 
-% Loop through the 6 distances and calculate thickness, cost and Intensities
+% Loop through the 6 distances and calculate thickness and cost
 for i = 1:6
-
-    if any([designLimitEditField{i}.Value, distanceEditField{i}.Value, occupationFactorEditField{i}.Value] < 0)
-    uialert(mainFig, 'Input values cannot be negative.', 'Input Error');
-    return; % Exit the function if negative values are found
-    end
-
     transmissionFactor(i) = (designLimitEditField{i}.Value * distanceEditField{i}.Value^2) / (workload * occupationFactorEditField{i}.Value);
 
-    % Check if transmissionFactor is valid. if not, set to 0
+    % Check if transmissionFactor is valid; if not, set to 0
     if isnan(transmissionFactor(i)) || transmissionFactor(i) == Inf || transmissionFactor(i) == -Inf || transmissionFactor(i) < 0
         transmissionFactor(i) = 0;
     end
 
     attenuationFactor(i) = log10(1 / transmissionFactor(i));
 
-    %Calculate initial intensity
-    InIntensity(i) = (activityEditField.Value * selectedSource.E * 1.6*10^-13) / (4*pi*distanceEditField{i}.Value^2);
-
-    % Check if InIntensity is valid. if not, set to 0
-    if isnan(InIntensity(i)) || InIntensity(i) == Inf || InIntensity(i) == -Inf
-        InIntensity(i) = 0;
-    end
-
-    % For each material, calculate thickness, cost and Intensity
+    % For each material, calculate thickness and cost
     materials = fieldnames(selectedSource.TVLe);  % Lead, Steel, Concrete
     for j = 1:length(materials)
         material = materials{j};
@@ -242,37 +230,46 @@ for i = 1:6
         end
 
         % Calculate cost based on material density and price per kg
-        thickness_m = ceil(thickness(j,i)); %thickness is in mm
+        % Assuming thickness is in mm, convert to meters for volume calculation
+        thickness_m = ceil(thickness(j,i));  % Convert mm to meters
         volume = thickness_m^3;  % Volume in m^3
         mass = density.(material) * volume;  % Mass in kg (assuming density units are consistent)
         cost(j,i) = PriceEditField.(material).Value * mass;
 
-        % Check if cost is valid. if not, set to 0
+        % Check if cost is valid; if not, set to 0
         if isnan(cost(j,i)) || cost(j,i) == Inf || cost(j,i) == -Inf
             cost(j,i) = 0;
         end
 
-        %Calculate Intensity attenuation
-        Intensity(j, i) = InIntensity(i)*exp(-selectedSource.(material)*density.(material)*thickness(j,i));
+        %Calculate attenuation
+        InActivity(i) = activityEditField.Value / (distanceEditField{i}.Value^2);
 
-        % Check if Intensity is valid. if not, set to 0
-        if isnan(Intensity(j, i)) || Intensity(j, i) == Inf || Intensity(j, i) == -Inf
-            Intensity(j, i) = 0;
+        % Check if Activity is valid; if not, set to 0
+        if isnan(InActivity(i)) || InActivity(i) == Inf || InActivity(i) == -Inf
+            InActivity(i) = 0;
         end
 
-        % Update the table and shield data for the current material and distance
+        Activity(j, i) = InActivity(i)*exp(-selectedSource.(material)*density.(material)*thickness(j,i));
+
+        % Check if Activity is valid; if not, set to 0
+        if isnan(Activity(j, i)) || Activity(j, i) == Inf || Activity(j, i) == -Inf
+            Activity(j, i) = 0;
+        end
+
+        % Update the table data for the current material and distance
         tableData{1,1} = sprintf('Lead');
         tableData{2,1} = sprintf('Steel');
         tableData{3,1} = sprintf('Concrete');
         tableData{j,2*i} = sprintf('%.2f mm', ceil(thickness(j,i)));  % Thickness in mm
         tableData{j, 2*i+1} = sprintf('€ %.2f', cost(j,i));        % Cost in EUR
 
+        %Update the shield data for material and distance
         shieldData{1,1} = sprintf('No Shielding');
         shieldData{2,1} = sprintf('Lead Shield');
         shieldData{3,1} = sprintf('Steel Shield');
         shieldData{4,1} = sprintf('Concrete Shield');
-        shieldData{1,i+1} = sprintf('%.2e W/m^2', InIntensity(i)); % Intensity in W/m^2 from Bq*J/m^2
-        shieldData{j+1,i+1} = sprintf('%.2e W/m^2', Intensity(j,i));
+        shieldData{1,i+1} = sprintf('%.2e MBq', InActivity(i));
+        shieldData{j+1,i+1} = sprintf('%.2e MBq', Activity(j,i));
 
     end
 end
@@ -283,7 +280,7 @@ shieldTable.Data = shieldData;
 
 end
 
-% Function to save table and shield data to Excel
+% Function to save table data to Excel
 function saveToExcel(resultTable, shieldTable, mainFig)
 
 % Open a dialog for the user to select a directory
