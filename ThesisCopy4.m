@@ -1,4 +1,4 @@
-clear all
+clearvars
 clc
 
 % Creating the main UI figure
