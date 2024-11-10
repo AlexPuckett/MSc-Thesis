@@ -71,8 +71,11 @@ sourceDropdown = uidropdown(shieldingTab, "Items", fieldnames(sourceData), 'Posi
 sourceDropdown.ValueChangedFcn = @(dd, event) updateSourceData(dd, sourceData);
 
 %Chechbox to add patient attenuation or not
-cbx = uicheckbox(shieldingTab,"Text","Pt. Att.",'Position',[160,640,70,22]);
-cbx_idr = uicheckbox(shieldingTab,"Text","IDR",'Position',[225,640,70,22]);
+cbx = uicheckbox(shieldingTab,"Text","Pt.Att.", 'Position',[160,640,70,22]);
+cbx_idr = uicheckbox(shieldingTab,"Text","IDR", 'Position',[225,640,70,22]);
+cbx_nomaze = uicheckbox(shieldingTab,"Text","NoMaze", 'Position',[280,640,70,22]);
+cbx_onelegmaze = uicheckbox(shieldingTab,"Text","OneLeg", 'Position',[350,640,70,22]);
+cbx_twolegmaze = uicheckbox(shieldingTab,"Text","TwoLeg", 'Position',[430,640,70,22]);
 
 % Labels and Edit Fields for workload calculations
 activityLabel = uilabel(shieldingTab, 'Text', 'A[MBq]', 'Position', [20, 615, 75, 22], 'Interpreter', 'tex', 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
