@@ -71,45 +71,48 @@ sourceDropdown = uidropdown(shieldingTab, "Items", fieldnames(sourceData), 'Posi
 sourceDropdown.ValueChangedFcn = @(dd, event) updateSourceData(dd, sourceData);
 
 %Chechbox to add patient attenuation or not
-cbx = uicheckbox(shieldingTab,"Text","Pt. Att.",'Position',[160,640,70,22]);
-cbx_idr = uicheckbox(shieldingTab,"Text","IDR",'Position',[225,640,70,22]);
+cbx = uicheckbox(shieldingTab,"Text","Pt.Att.", 'Position',[160,640,70,22]);
+cbx_idr = uicheckbox(shieldingTab,"Text","IDR", 'Position',[225,640,70,22]);
+cbx_nomaze = uicheckbox(shieldingTab,"Text","NoMaze", 'Position',[280,640,70,22]);
+cbx_onelegmaze = uicheckbox(shieldingTab,"Text","OneLeg", 'Position',[350,640,70,22]);
+cbx_twolegmaze = uicheckbox(shieldingTab,"Text","TwoLeg", 'Position',[430,640,70,22]);
 
 % Labels and Edit Fields for workload calculations
 activityLabel = uilabel(shieldingTab, 'Text', 'A[MBq]', 'Position', [20, 615, 75, 22], 'Interpreter', 'tex', 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+numberSourcesLabel = uilabel(shieldingTab, 'Text', '#S', 'Interpreter', 'tex', 'Position', [20, 590, 75, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
 doseLabel = uilabel(shieldingTab, 'Text', 'D[Gy/pt]', 'Position', [20, 565, 75, 22], 'Interpreter', 'tex', 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
 rateLabel = uilabel(shieldingTab, 'Text', 'D_{rate}[Gy/min]', 'Interpreter', 'tex', 'Position', [20, 540, 75, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
 treatmentsLabel = uilabel(shieldingTab, 'Text', 'Tr_{per week}', 'Interpreter', 'tex', 'Position', [20, 515, 75, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
 treatmentsidrLabel = uilabel(shieldingTab, 'Text', 'Tr_{per day}', 'Interpreter', 'tex', 'Position', [20, 490, 75, 22,], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
-numberSourcesLabel = uilabel(shieldingTab, 'Text', '#S', 'Interpreter', 'tex', 'Position', [20, 590, 75, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
 
 activityEditField = uieditfield(shieldingTab, 'numeric', 'Position', [85, 615, 48, 22], "ValueDisplayFormat", "%.2f");
+numberSourcesEditField = uieditfield(shieldingTab,'numeric', 'Position',[85, 590, 48, 22], "ValueDisplayFormat", "%.2f");
 doseEditField = uieditfield(shieldingTab, 'numeric', 'Position', [85, 565, 48, 22], "ValueDisplayFormat", "%.2f");
 rateEditField = uieditfield(shieldingTab, 'numeric', 'Position', [85, 540, 48, 22], "ValueDisplayFormat", "%.2f");
 treatmentsEditField = uieditfield(shieldingTab, 'numeric', 'Position', [85, 515, 48, 22], "ValueDisplayFormat", "%.2f", 'Editable', 'off');
 treatmentsidrEditField = uieditfield(shieldingTab, 'numeric', 'Position', [85, 490, 48, 22], "ValueDisplayFormat", "%.2f", 'Editable', 'off');
-numberSourcesEditField = uieditfield(shieldingTab,'numeric', 'Position',[85, 590, 48, 22], "ValueDisplayFormat", "%.2f");
 
 % Labels and Edit Fields for Transmission Factor Calculations
+distanceLabel = cell(1,6);
+areaLabel = cell(1,6);
 designLimitLabel = cell(1,6);
 designLimitAreaDropdown = cell(1,6);
-distanceLabel = cell(1,6);
 occupationFactorLabel = cell(1,6);
-areaLabel = cell(1,6);
-designLimitEditField = cell(1,6);
 distanceEditField = cell(1,6);
-occupationFactorEditField = cell(1,6);
 areaEditField = cell(1,6);
+designLimitEditField = cell(1,6);
+occupationFactorEditField = cell(1,6);
 cbx_contamination = cell(1,6);
 for i = 1:6
+    distanceLabel{i} = uilabel(shieldingTab, 'Text', ['d_{' num2str(i) '}[m]'], 'Interpreter', 'tex', 'Position', [150, 615-(i-1)*25, 35, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+    areaLabel{i} = uilabel(shieldingTab, 'Text', ['A_{' num2str(i) '}[m^{2}]'], 'Interpreter', 'tex', 'Position', [250, 615-(i-1)*25, 50, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
     designLimitLabel{i} = uilabel(shieldingTab, 'Text', 'P[μGy]', 'Interpreter', 'tex', 'Position', [365, 615-(i-1)*25, 40, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
     designLimitAreaDropdown{i} = uidropdown(shieldingTab, "Items", ["Select", "Controlled Area", "Uncontrolled Area", "Public Area"], 'Position', [405, 615-(i-1)*25, 65, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
-    distanceLabel{i} = uilabel(shieldingTab, 'Text', ['d_{' num2str(i) '}[m]'], 'Interpreter', 'tex', 'Position', [150, 615-(i-1)*25, 35, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
     occupationFactorLabel{i} = uilabel(shieldingTab, 'Text', 'T', 'Interpreter', 'tex', 'Position', [570, 615-(i-1)*25, 30, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
-    areaLabel{i} = uilabel(shieldingTab, 'Text', ['A_{' num2str(i) '}[m^{2}]'], 'Interpreter', 'tex', 'Position', [250, 615-(i-1)*25, 50, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
-    designLimitEditField{i} = uieditfield(shieldingTab, 'numeric', 'Position', [475, 615-(i-1)*25, 48, 22], "ValueDisplayFormat", "%.2f", 'Editable', 'off');
     distanceEditField{i} = uieditfield(shieldingTab, 'numeric', 'Position', [185, 615-(i-1)*25, 48, 22], "ValueDisplayFormat", "%.2f");
-    occupationFactorEditField{i} = uieditfield(shieldingTab, 'numeric', 'Position', [580, 615-(i-1)*25, 48, 22], "ValueDisplayFormat", "%.2f");
     areaEditField{i} = uieditfield(shieldingTab, 'numeric', 'Position', [295, 615-(i-1)*25, 48, 22], "ValueDisplayFormat", "%.2f");
+    designLimitEditField{i} = uieditfield(shieldingTab, 'numeric', 'Position', [475, 615-(i-1)*25, 48, 22], "ValueDisplayFormat", "%.2f", 'Editable', 'off');
+    occupationFactorEditField{i} = uieditfield(shieldingTab, 'numeric', 'Position', [580, 615-(i-1)*25, 48, 22], "ValueDisplayFormat", "%.2f");
     cbx_contamination{i} = uicheckbox(shieldingTab,"Text","F",'Position',[525, 615-(i-1)*25, 30, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
 
     % Callback to designLimitAreaDropdown to update designLimitEditField
@@ -134,8 +137,8 @@ for i = 1:2
     mazeareabLabel = uilabel(shieldingTab, 'Text', ['A_{m' num2str(i) 'b}[m^{2}]'], 'Interpreter', 'tex', 'Position', [640, 590-(i-1)*50, 60, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
     incidentangleLabel = uilabel(shieldingTab, 'Text', ['θ°_o' num2str(i)], 'Interpreter', 'tex', 'Position', [760, 615-(i-1)*50, 30, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
     refangleLabel = uilabel(shieldingTab, 'Text', ['θ°_r' num2str(i)], 'Interpreter', 'tex', 'Position', [760, 590-(i-1)*50, 30, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
-    mazeareaaEditField{i} = uieditfield(shieldingTab, 'numeric', 'Position', [700, 615-(i-1)*50, 48, 22], "ValueDisplayFormat", "%.2f");
-    mazeareabEditField{i} = uieditfield(shieldingTab, 'numeric', 'Position', [700, 590-(i-1)*50, 48, 22], "ValueDisplayFormat", "%.2f");
+    mazeareaaEditField{i} = uieditfield(shieldingTab, 'numeric', 'Position', [695, 615-(i-1)*50, 48, 22], "ValueDisplayFormat", "%.2f");
+    mazeareabEditField{i} = uieditfield(shieldingTab, 'numeric', 'Position', [695, 590-(i-1)*50, 48, 22], "ValueDisplayFormat", "%.2f");
     incidentangleEditField{i} = uieditfield(shieldingTab, 'numeric', 'Position', [790, 615-(i-1)*50, 48, 22], "ValueDisplayFormat", "%.2f");
     refangleEditField{i} = uieditfield(shieldingTab, 'numeric', 'Position', [790, 590-(i-1)*50, 48, 22], "ValueDisplayFormat", "%.2f");
 end
@@ -185,10 +188,18 @@ calcButton = uibutton(shieldingTab, 'Position', [1030, 515, 100, 22], 'Text', 'C
 calcButton.ButtonPushedFcn = @(btn, event) calculateShieldingThickness(sourceDropdown, activityEditField, doseEditField, rateEditField, treatmentsEditField, workloadValue, designLimitEditField, distanceEditField, occupationFactorEditField, areaEditField, numberSourcesEditField, sourceData, density, PriceEditField, resultTable, tableData, shieldTable, shieldData, mainFig, cbx, cbx_idr);
 
 % Callback for cbx_idr checkbox to update design limits and toggle treatment fields
-cbx_idr.ValueChangedFcn = @(src, event) handleIDRToggle(src, designLimitAreaDropdown, designLimitEditField, treatmentsEditField, treatmentsidrEditField, occupationFactorEditField);
+cbx_idr.ValueChangedFcn = @(src, event) IDRToggle(src, designLimitAreaDropdown, designLimitEditField, treatmentsEditField, treatmentsidrEditField, occupationFactorEditField);
+
+% Store checkboxes in an array
+checkboxes = [cbx_nomaze, cbx_onelegmaze, cbx_twolegmaze];
+
+% Assign the common callback to each checkbox in a loop
+for i = 1:numel(checkboxes)
+    checkboxes(i).ValueChangedFcn = @(src, event) MazeToggle(src, cbx_nomaze, cbx_onelegmaze, cbx_twolegmaze, mazedistEditField, mazeareaaEditField, mazeareabEditField, incidentangleEditField, refangleEditField);
+end
 
 % Function to toggle the editable state of treatment fields and the design Limit values
-function handleIDRToggle(cbx_idr, designLimitAreaDropdown, designLimitEditField, treatmentsEditField, treatmentsidrEditField, occupationFactorEditField)
+function IDRToggle(cbx_idr, designLimitAreaDropdown, designLimitEditField, treatmentsEditField, treatmentsidrEditField, occupationFactorEditField)
     % Update all design limit fields
     for i = 1:length(designLimitAreaDropdown)
         % Call setDesignLimit for each dropdown and edit field pair
@@ -201,6 +212,54 @@ function handleIDRToggle(cbx_idr, designLimitAreaDropdown, designLimitEditField,
             treatmentsEditField.Editable = 'on';
             treatmentsidrEditField.Editable = 'off';
             occupationFactorEditField{i}.Editable = 'on';
+        end
+    end
+end
+
+function MazeToggle(src, cbx_nomaze, cbx_onelegmaze, cbx_twolegmaze, mazedistEditField, mazeareaaEditField, mazeareabEditField, incidentangleEditField, refangleEditField) 
+     if src == cbx_nomaze
+        cbx_onelegmaze.Value = false;
+        cbx_twolegmaze.Value = false;
+    elseif src == cbx_onelegmaze
+        cbx_nomaze.Value = false;
+        cbx_twolegmaze.Value = false;
+    elseif src == cbx_twolegmaze
+        cbx_nomaze.Value = false;
+        cbx_onelegmaze.Value = false;
+    end
+
+    for i = 1:3
+        if cbx_nomaze.Value
+            mazedistEditField{i}.Editable = 'off';
+        elseif cbx_onelegmaze.Value
+            mazedistEditField{1}.Editable = 'on';
+            mazedistEditField{2}.Editable = 'on';
+            mazedistEditField{3}.Editable = 'off';
+        elseif cbx_twolegmaze.Value
+            mazedistEditField{i}.Editable = 'on';
+        end
+    end
+
+    for i = 1:2
+        if cbx_nomaze.Value
+            mazeareaaEditField{i}.Editable = 'off';
+            mazeareabEditField{i}.Editable = 'off';
+            incidentangleEditField{i}.Editable = 'off';
+            refangleEditField{i}.Editable = 'off';
+        elseif cbx_onelegmaze.Value
+            mazeareaaEditField{1}.Editable = 'on';
+            mazeareabEditField{1}.Editable = 'on';
+            mazeareaaEditField{2}.Editable = 'off';
+            mazeareabEditField{2}.Editable = 'off';
+            incidentangleEditField{1}.Editable = 'on';
+            incidentangleEditField{2}.Editable = 'off';
+            refangleEditField{1}.Editable = 'on';
+            refangleEditField{2}.Editable = 'off';
+        elseif cbx_twolegmaze.Value
+            mazeareaaEditField{i}.Editable = 'on';
+            mazeareabEditField{i}.Editable = 'on';
+            incidentangleEditField{i}.Editable = 'on';
+            refangleEditField{i}.Editable = 'on';
         end
     end
 end
