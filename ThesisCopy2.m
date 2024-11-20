@@ -76,11 +76,11 @@ density.ConcreteBa = 4.2e-6;
 density.Steel = 7.9e-6;
 density.Lead = 1.13e-5;
 
-Parameters = readtable('Materials.xlsx','Sheet','Parameters');
+Parameters = readtable('Materials.xlsx','Sheet','Parameters','ReadVariableNames',false);
 massattcoef = struct();
-massattcoef.Lead = readtable('Materials.xlsx','Sheet','Lead');
-massattcoef.Steel = readtable('Materials.xlsx','Sheet','Steel');
-massattcoef.ConcreteBa = readtable('Materials.xlsx','Sheet','ConcreteBarite');
+massattcoef.Lead = readtable('Materials.xlsx','Sheet','Lead','ReadVariableNames',false);
+massattcoef.Steel = readtable('Materials.xlsx','Sheet','Steel','ReadVariableNames',false);
+massattcoef.ConcreteBa = readtable('Materials.xlsx','Sheet','ConcreteBarite','ReadVariableNames',false);
 
 %% Creating Labels, Edit Fields, Checkboxes and DropDowns
 % Dropdown for sources
@@ -117,7 +117,7 @@ treatmentsidrEditField = uieditfield(workloadPanel, 'numeric', 'Position', [85, 
 % Labels and Edit Fields for Transmission Factor Calculations
 distanceLabel = cell(1,6);
 areaLabel = cell(1,6);
-designLimitLabel = cell(1,8);
+designLimitLabel = cell(1,9);
 distanceEditField = cell(1,6);
 areaEditField = cell(1,6);
 for i = 1:6
@@ -129,13 +129,14 @@ for i = 1:6
 end
 designLimitLabel{7} = uilabel(designparameteresPanel, 'Text', 'P_{m1}', 'Interpreter', 'tex', 'Position', [10, 40, 40, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
 designLimitLabel{8} = uilabel(designparameteresPanel, 'Text', 'P_{m2}', 'Interpreter', 'tex', 'Position', [10, 15, 40, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+designLimitLabel{9} = uilabel(designparameteresPanel, 'Text', 'P_{m3}', 'Interpreter', 'tex', 'Position', [10, -10, 40, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
 
-occupationFactorLabel = cell(1,8);
-designLimitAreaDropdown = cell(1,8);
-designLimitEditField = cell(1,8);
-occupationFactorEditField = cell(1,8);
-cbx_contamination = cell(1,8);
-for i = 1:8
+occupationFactorLabel = cell(1,9);
+designLimitAreaDropdown = cell(1,9);
+designLimitEditField = cell(1,9);
+occupationFactorEditField = cell(1,9);
+cbx_contamination = cell(1,9);
+for i = 1:9
     occupationFactorLabel{i} = uilabel(designparameteresPanel, 'Text', 'T', 'Interpreter', 'tex', 'Position', [210, 190-(i-1)*25, 30, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
     designLimitAreaDropdown{i} = uidropdown(designparameteresPanel, "Items", ["Select", "Controlled Area", "Uncontrolled Area", "Public Area"], 'Position', [50, 190-(i-1)*25, 65, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
     designLimitEditField{i} = uieditfield(designparameteresPanel, 'numeric', 'Position', [120, 190-(i-1)*25, 48, 22], "ValueDisplayFormat", "%.2f", 'Editable', 'off');
@@ -149,27 +150,33 @@ for i = 1:8
     cbx_contamination{i}.ValueChangedFcn = @(cbx, event) updateDesignLimitWithContamination(cbx, designLimitAreaDropdown{i}, designLimitEditField{i}, cbx_idr);
 end
 
-entrancedistLabel = uilabel(distancesPanel, 'Text', 'd_{d} [m]', 'Interpreter', 'tex', 'Position', [110, 150, 60, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
-entrancedistEditField = uieditfield(distancesPanel, 'numeric', 'Position', [150, 150, 48, 22], "ValueDisplayFormat", "%.2f");
+entrancedistLabel = cell(1,2);
+entrancedistEditField = cell(1,2);
+for i = 1:2
+    entrancedistLabel{i} = uilabel(distancesPanel, 'Text', ['d_{d' num2str(i) '} [m]'], 'Interpreter', 'tex', 'Position', [110, 150-(i-1)*25, 60, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+    entrancedistEditField{i} = uieditfield(distancesPanel, 'numeric', 'Position', [150, 150-(i-1)*25, 48, 22], "ValueDisplayFormat", "%.2f");
+end
 mazedistEditField = cell(1,3);
 for i = 1:3
-    mazedistLabel = uilabel(distancesPanel, 'Text', ['d_{m' num2str(i) '}[m]'], 'Interpreter', 'tex', 'Position', [110, 125-(i-1)*25, 60, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
-    mazedistEditField{i} = uieditfield(distancesPanel, 'numeric', 'Position', [150, 125-(i-1)*25, 48, 22], "ValueDisplayFormat", "%.2f");
+    mazedistLabel = uilabel(distancesPanel, 'Text', ['d_{m' num2str(i) '}[m]'], 'Interpreter', 'tex', 'Position', [110, 100-(i-1)*25, 60, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+    mazedistEditField{i} = uieditfield(distancesPanel, 'numeric', 'Position', [150, 100-(i-1)*25, 48, 22], "ValueDisplayFormat", "%.2f");
 end
 
 mazeareaaEditField = cell(1,2);
 mazeareabEditField = cell(1,2);
 incidentangleEditField = cell(1,2);
 refangleEditField = cell(1,2);
-mazeareaLabel = uilabel(areasPanel, 'Text', 'A_{m} [m^{2}]', 'Interpreter', 'tex', 'Position', [110, 150, 60, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+mazeareaLabel = uilabel(areasPanel, 'Text', 'A_{ma} [m^{2}]', 'Interpreter', 'tex', 'Position', [110, 150, 60, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
 mazeareaEditField = uieditfield(areasPanel, 'numeric', 'Position', [160, 150, 48, 22], "ValueDisplayFormat", "%.2f");
+mazeareaLabel_ = uilabel(areasPanel, 'Text', 'A_{mb} [m^{2}]', 'Interpreter', 'tex', 'Position', [110, 125, 60, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+mazeareaEditField_ = uieditfield(areasPanel, 'numeric', 'Position', [160, 125, 48, 22], "ValueDisplayFormat", "%.2f");
 for i = 1:2
-    mazeareaaLabel = uilabel(areasPanel, 'Text', ['A_{m' num2str(i) 'a}[m^{2}]'], 'Interpreter', 'tex', 'Position', [110, 125-(i-1)*50, 60, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
-    mazeareabLabel = uilabel(areasPanel, 'Text', ['A_{m' num2str(i) 'b}[m^{2}]'], 'Interpreter', 'tex', 'Position', [110, 100-(i-1)*50, 60, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+    mazeareaaLabel = uilabel(areasPanel, 'Text', ['A_{m' num2str(i) 'a}[m^{2}]'], 'Interpreter', 'tex', 'Position', [110, 100-(i-1)*50, 60, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+    mazeareabLabel = uilabel(areasPanel, 'Text', ['A_{m' num2str(i) 'b}[m^{2}]'], 'Interpreter', 'tex', 'Position', [110, 75-(i-1)*50, 60, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
     incidentangleLabel = uilabel(anglesPanel, 'Text', ['θ°_o' num2str(i)], 'Interpreter', 'tex', 'Position', [10+(i-1)*85, 35, 30, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
     refangleLabel = uilabel(anglesPanel, 'Text', ['θ°_r' num2str(i)], 'Interpreter', 'tex', 'Position', [10+(i-1)*85, 10, 30, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
-    mazeareaaEditField{i} = uieditfield(areasPanel, 'numeric', 'Position', [160, 125-(i-1)*50, 48, 22], "ValueDisplayFormat", "%.2f");
-    mazeareabEditField{i} = uieditfield(areasPanel, 'numeric', 'Position', [160, 100-(i-1)*50, 48, 22], "ValueDisplayFormat", "%.2f");
+    mazeareaaEditField{i} = uieditfield(areasPanel, 'numeric', 'Position', [160, 100-(i-1)*50, 48, 22], "ValueDisplayFormat", "%.2f");
+    mazeareabEditField{i} = uieditfield(areasPanel, 'numeric', 'Position', [160, 75-(i-1)*50, 48, 22], "ValueDisplayFormat", "%.2f");
     incidentangleEditField{i} = uieditfield(anglesPanel, 'numeric', 'Position', [35+(i-1)*85, 35, 48, 22], "ValueDisplayFormat", "%.2f");
     refangleEditField{i} = uieditfield(anglesPanel, 'numeric', 'Position', [35+(i-1)*85, 10, 48, 22], "ValueDisplayFormat", "%.2f");
 end
@@ -188,13 +195,15 @@ PriceEditField.Steel = uieditfield(pricesPanel, 'numeric', 'Position', [110, 35,
 PriceEditField.ConcreteBa = uieditfield(pricesPanel, 'numeric', 'Position', [110, 10, 48, 22], "ValueDisplayFormat", "%.2f");
 
 %% Setting up tables to insert data
-tableData = cell(3, 15);  % Cell array for the table data
+tableData = cell(3, 17);  % Cell array for the table data
 
 % Column headers for the result table
-columnNames = cell(1,15);
+columnNames = cell(1,17);
 columnNames{1} = 'Materials';
-columnNames{14} = 'MazeThickness';
-columnNames{15} = 'MazeCost';
+columnNames{14} = 'MazeThickness1';
+columnNames{15} = 'MazeCost1';
+columnNames{16} = 'MazeThickness2';
+columnNames{17} = 'MazeCost2';
 for i = 1:6
     columnNames{2*i} = ['Thickness' num2str(i)];
     columnNames{2*i+1} = ['Cost' num2str(i)];
@@ -202,12 +211,18 @@ end
 % Create the table in the UI (positioned at the bottom for displaying results)
 resultTable = uitable(shieldingTab, 'Data', tableData, 'ColumnName', columnNames, 'Position', [10, 300, 500, 117], 'ColumnWidth', repmat({76}, 1, 12));
 
-shieldData = cell(4,7); % Cell array for the shielding data
+shieldData = cell(4,33); % Cell array for the shielding data
 %Column headers for shielding table
-columnNames1 = cell(1,7);
+columnNames1 = cell(1,33);
 columnNames1{1} = 'Shielding';
 for i = 1:6
     columnNames1{i+1} = ['Distance' num2str(i)];
+end
+for i = 8:31
+    columnNames1{i} = ['DiagDistance' num2str(i-7)];
+end
+for i = 32:33
+    columnNames1{i} = ['Leg' num2str(i-31)];
 end
 shieldTable = uitable(shieldingTab, 'Data', shieldData, 'ColumnName', columnNames1, 'Position', [10, 180, 500, 117], 'ColumnWidth', repmat({95}, 1, 6));
 
@@ -227,7 +242,7 @@ saveButton.ButtonPushedFcn = @(btn, event) saveToExcel(resultTable, shieldTable,
 
 % Calculating shielding thickness and updating the table
 calcButton = uibutton(shieldingTab, 'Position', [500, 640, 50, 22], 'Text', '►');
-calcButton.ButtonPushedFcn = @(btn, event) calculateShieldingThickness(sourceDropdown, activityEditField, doseEditField, rateEditField, treatmentsEditField, workloadValue, designLimitEditField, distanceEditField, occupationFactorEditField, areaEditField, entrancedistEditField, mazedistEditField, mazeareaEditField, mazeareaaEditField, mazeareabEditField, incidentangleEditField, refangleEditField, numberSourcesEditField, sourceData, density, PriceEditField, resultTable, tableData, shieldTable, shieldData, mazeTable, mazeData, mainFig, cbx, cbx_idr, massattcoef, cbx_onelegmaze, cbx_twolegmaze, Parameters);
+calcButton.ButtonPushedFcn = @(btn, event) calculateShieldingThickness(sourceDropdown, activityEditField, doseEditField, rateEditField, treatmentsEditField, treatmentsidrEditField, workloadValue, designLimitEditField, distanceEditField, occupationFactorEditField, areaEditField, entrancedistEditField, mazedistEditField, mazeareaEditField, mazeareaEditField_, mazeareaaEditField, mazeareabEditField, incidentangleEditField, refangleEditField, numberSourcesEditField, sourceData, density, PriceEditField, resultTable, tableData, shieldTable, shieldData, mazeTable, mazeData, mainFig, cbx, cbx_idr, massattcoef, cbx_onelegmaze, cbx_twolegmaze, Parameters);
 
 % Callback for cbx_idr checkbox to update design limits and toggle treatment fields
 cbx_idr.ValueChangedFcn = @(src, event) IDRToggle(src, designLimitAreaDropdown, designLimitEditField, treatmentsEditField, treatmentsidrEditField, occupationFactorEditField);
@@ -237,7 +252,7 @@ checkboxes = [cbx_nomaze, cbx_onelegmaze, cbx_twolegmaze];
 
 % Assign the common callback to each checkbox in a loop
 for i = 1:numel(checkboxes)
-    checkboxes(i).ValueChangedFcn = @(src, event) MazeToggle(src, cbx_nomaze, cbx_onelegmaze, cbx_twolegmaze, mazedistEditField, mazeareaaEditField, mazeareabEditField, incidentangleEditField, refangleEditField);
+    checkboxes(i).ValueChangedFcn = @(src, event) MazeToggle(src, cbx_nomaze, cbx_onelegmaze, cbx_twolegmaze, mazedistEditField, mazeareaEditField, mazeareaEditField_, mazeareaaEditField, mazeareabEditField, incidentangleEditField, refangleEditField, entrancedistEditField);
 end
 
 %% Setting up toggles
@@ -259,7 +274,7 @@ for i = 1:length(designLimitAreaDropdown)
 end
 end
 
-function MazeToggle(src, cbx_nomaze, cbx_onelegmaze, cbx_twolegmaze, mazedistEditField, mazeareaaEditField, mazeareabEditField, incidentangleEditField, refangleEditField)
+function MazeToggle(src, cbx_nomaze, cbx_onelegmaze, cbx_twolegmaze, mazedistEditField, mazeareaEditField, mazeareaEditField_, mazeareaaEditField, mazeareabEditField, incidentangleEditField, refangleEditField, entrancedistEditField)
 if src == cbx_nomaze
     cbx_onelegmaze.Value = false;
     cbx_twolegmaze.Value = false;
@@ -285,11 +300,16 @@ end
 
 for i = 1:2
     if cbx_nomaze.Value
+        mazeareaEditField.Editable = 'off';
+        mazeareaEditField_.Editable = 'off';
         mazeareaaEditField{i}.Editable = 'off';
         mazeareabEditField{i}.Editable = 'off';
         incidentangleEditField{i}.Editable = 'off';
         refangleEditField{i}.Editable = 'off';
+        entrancedistEditField{i}.Editable = 'off';
     elseif cbx_onelegmaze.Value
+        mazeareaEditField.Editable = 'on';
+        mazeareaEditField_.Editable = 'off';
         mazeareaaEditField{1}.Editable = 'on';
         mazeareabEditField{1}.Editable = 'on';
         mazeareaaEditField{2}.Editable = 'off';
@@ -298,11 +318,16 @@ for i = 1:2
         incidentangleEditField{2}.Editable = 'off';
         refangleEditField{1}.Editable = 'on';
         refangleEditField{2}.Editable = 'off';
+        entrancedistEditField{1}.Editable = 'on';
+        entrancedistEditField{2}.Editable = 'off';
     elseif cbx_twolegmaze.Value
+        mazeareaEditField.Editable = 'on';
+        mazeareaEditField_.Editable = 'on';
         mazeareaaEditField{i}.Editable = 'on';
         mazeareabEditField{i}.Editable = 'on';
         incidentangleEditField{i}.Editable = 'on';
         refangleEditField{i}.Editable = 'on';
+        entrancedistEditField{i}.Editable = 'on';
     end
 end
 end
@@ -353,7 +378,7 @@ selectedSource = sourceData.(sourceDropdown.Value);
 end
 
 % Function to calculate shielding thickness and update the table
-function calculateShieldingThickness(sourceDropdown, activityEditField, doseEditField, rateEditField, treatmentsEditField, workloadValue, designLimitEditField, distanceEditField, occupationFactorEditField, areaEditField, entrancedistEditField, mazedistEditField, mazeareaEditField, mazeareaaEditField, mazeareabEditField, incidentangleEditField, refangleEditField, numberSourcesEditField, sourceData, density, PriceEditField, resultTable, tableData, shieldTable, shieldData, mazeTable, mazeData, mainFig, cbx, cbx_idr, massattcoef, cbx_onelegmaze, cbx_twolegmaze, Parameters)
+function calculateShieldingThickness(sourceDropdown, activityEditField, doseEditField, rateEditField, treatmentsEditField, treatmentsidrEditField, workloadValue, designLimitEditField, distanceEditField, occupationFactorEditField, areaEditField, entrancedistEditField, mazedistEditField, mazeareaEditField, mazeareaEditField_, mazeareaaEditField, mazeareabEditField, incidentangleEditField, refangleEditField, numberSourcesEditField, sourceData, density, PriceEditField, resultTable, tableData, shieldTable, shieldData, mazeTable, mazeData, mainFig, cbx, cbx_idr, massattcoef, cbx_onelegmaze, cbx_twolegmaze, Parameters)
 
 % Get the selected source data
 selectedSource = sourceData.(sourceDropdown.Value);
@@ -367,7 +392,9 @@ cost = zeros(3,6);       % Same size for cost
 DoseRate = zeros(3,6);
 InDoseRate = zeros(1,6);
 mazethickness = zeros(3,1);
+mazethickness_ = zeros(3,1);
 mazecost = zeros(3,1);
+mazecost_ = zeros(3,1);
 
 if cbx.Value == 0
     F = 1;
@@ -382,7 +409,7 @@ if any([activityEditField.Value, numberSourcesEditField.Value, doseEditField.Val
 end
 
 if cbx_idr.Value
-    workload = selectedSource.RAKR * activityEditField.Value * numberSourcesEditField.Value;
+    workload = selectedSource.RAKR * activityEditField.Value * numberSourcesEditField.Value; %Do = RAKR*A*n
     % Set workload to 0 if it is negative
     if workload < 0
         workload = 0;
@@ -390,7 +417,7 @@ if cbx_idr.Value
     workloadValue.Text = sprintf('%.2f μGym^{2}/hour', workload);
     workloadValue.Interpreter = 'tex';
 else
-    % Calculate the workload
+    % W = RAKR*A*n*t*N
     workload = selectedSource.RAKR * activityEditField.Value * numberSourcesEditField.Value * (doseEditField.Value / (rateEditField.Value * 60)) * treatmentsEditField.Value;
 
     % Set workload to 0 if it is negative
@@ -405,10 +432,28 @@ end
 for i = 1:6
     if cbx_idr.Value
         transmissionFactor(i) = (designLimitEditField{i}.Value * F * distanceEditField{i}.Value^2) / (workload);
-        entrancetransmissionFactor  = (7.5 * F * entrancedistEditField.Value^2) / (selectedSource.RAKR * activityEditField.Value * numberSourcesEditField.Value);
+        if cbx_onelegmaze.Value
+            entrancetransmissionFactor  = (designLimitEditField{7}.Value * F * entrancedistEditField{1}.Value^2) / (workload);
+            entrancetransmissionFactor_  = 0;
+        elseif cbx_twolegmaze.Value
+            entrancetransmissionFactor  = (designLimitEditField{7}.Value * F * entrancedistEditField{1}.Value^2) / (workload);
+            entrancetransmissionFactor_  = (designLimitEditField{8}.Value * F * entrancedistEditField{2}.Value^2) / (workload);
+        else
+            entrancetransmissionFactor  = 0;
+            entrancetransmissionFactor_  = 0;
+        end
     else
         transmissionFactor(i) = (designLimitEditField{i}.Value * F * distanceEditField{i}.Value^2) / (workload * occupationFactorEditField{i}.Value);
-        entrancetransmissionFactor  = (3 * F * entrancedistEditField.Value^2) / (selectedSource.RAKR * activityEditField.Value *numberSourcesEditField.Value);
+        if cbx_onelegmaze.Value
+            entrancetransmissionFactor  = (designLimitEditField{7}.Value * F * entrancedistEditField{1}.Value^2) / (workload * occupationFactorEditField{i}.Value);
+            entrancetransmissionFactor_  = 0;
+        elseif cbx_twolegmaze.Value
+            entrancetransmissionFactor  = (designLimitEditField{7}.Value * F * entrancedistEditField{1}.Value^2) / (workload * occupationFactorEditField{i}.Value);
+            entrancetransmissionFactor_  = (designLimitEditField{8}.Value * F * entrancedistEditField{2}.Value^2) / (workload * occupationFactorEditField{i}.Value);
+        else
+            entrancetransmissionFactor  = 0;
+            entrancetransmissionFactor_  = 0;
+        end
     end
     % Check if transmissionFactor is valid; if not, set to 0
     if isnan(transmissionFactor(i)) || transmissionFactor(i) == Inf || transmissionFactor(i) == -Inf || transmissionFactor(i) < 0
@@ -417,9 +462,21 @@ for i = 1:6
     if isnan(entrancetransmissionFactor) || entrancetransmissionFactor == Inf || entrancetransmissionFactor == -Inf || entrancetransmissionFactor < 0
         entrancetransmissionFactor = 0;
     end
+    if isnan(entrancetransmissionFactor_) || entrancetransmissionFactor_ == Inf || entrancetransmissionFactor_ == -Inf || entrancetransmissionFactor_ < 0
+        entrancetransmissionFactor_ = 0;
+    end
 
     attenuationFactor(i) = log10(1 / transmissionFactor(i));
-    entranceattenutationFactor = log10(1/entrancetransmissionFactor);
+    if cbx_onelegmaze.Value
+        entranceattenutationFactor = log10(1/entrancetransmissionFactor);
+        entranceattenutationFactor_ = 0;
+    elseif cbx_twolegmaze.Value
+        entranceattenutationFactor = log10(1/entrancetransmissionFactor);
+        entranceattenutationFactor_ = log10(1/entrancetransmissionFactor_);
+    else
+        entranceattenutationFactor = 0;
+        entranceattenutationFactor_ = 0;
+    end
 
     % For each material, calculate thickness and cost
     materials = fieldnames(selectedSource.TVLe);  % Lead, Steel, Concrete
@@ -434,7 +491,16 @@ for i = 1:6
 
         % Calculate thickness: thickness = TVL1 + (attenuationFactor - 1) * TVLe
         thickness(j,i) = TVL1 + (attenuationFactor(i)-1)*TVLe;
-        mazethickness(j,1) = TVL1 + (entranceattenutationFactor - 1)* TVLe;
+        if cbx_onelegmaze.Value
+            mazethickness(j,1) = TVL1 + (entranceattenutationFactor - 1)* TVLe;
+            mazethickness_(j,1) = 0;
+        elseif cbx_twolegmaze.Value
+            mazethickness(j,1) = TVL1 + (entranceattenutationFactor - 1)* TVLe;
+            mazethickness_(j,1) = TVL1 + (entranceattenutationFactor_ - 1)* TVLe;
+        else
+            mazethickness(j,1) = 0;
+            mazethickness_(j,1) = 0;
+        end
 
         % Check if thickness is valid; if not, set to 0
         if isnan(thickness(j,i)) || thickness(j,i) == Inf || thickness(j,i) == -Inf
@@ -443,17 +509,30 @@ for i = 1:6
         if isnan(mazethickness(j,1)) || mazethickness(j,1) == Inf || mazethickness(j,1) == -Inf
             mazethickness(j,1) = 0;
         end
+        if isnan(mazethickness_(j,1)) || mazethickness_(j,1) == Inf || mazethickness_(j,1) == -Inf
+            mazethickness_(j,1) = 0;
+        end
+
 
         % Calculate cost based on material density and price per kg
         % Assuming thickness is in mm
         thickness_mm = ceil(thickness(j,i));
-        mazethickness_mm = ceil(mazethickness(j,1));
-        numberofslabs = areaEditField{i}.Value*10^6/thickness_mm^2;
-        mazenumberofslabs = mazeareaEditField.Value*10^5/mazethickness_mm^2;
-        volume = thickness_mm^3;  % Volume in m^3
-        mazevolume = mazethickness_mm^3;
-        cost(j,i) = PriceEditField.(material).Value * density.(material) * volume * numberofslabs;
-        mazecost(j,1) = PriceEditField.(material).Value * density.(material) * mazevolume * mazenumberofslabs;
+        if cbx_onelegmaze.Value
+            mazethickness_mm = ceil(mazethickness(j,1));
+            mazethickness_mm_ = 0;
+        elseif cbx_twolegmaze.Value
+            mazethickness_mm = ceil(mazethickness(j,1));
+            mazethickness_mm_ = ceil(mazethickness_(j,1));
+        else
+            mazethickness_mm = 0;
+            mazethickness_mm_ = 0;
+        end
+        volume = areaEditField{i}.Value*1e6*thickness_mm;  % Volume in mm^3
+        mazevolume = mazeareaEditField.Value*1e6*mazethickness_mm^3;
+        mazevolume_ = mazeareaEditField_.Value*1e6*mazethickness_mm_^3;
+        cost(j,i) = PriceEditField.(material).Value * density.(material) * volume;
+        mazecost(j,1) = PriceEditField.(material).Value * density.(material) * mazevolume;
+        mazecost_(j,1) = PriceEditField.(material).Value * density.(material) * mazevolume_;
 
         % Check if cost is valid; if not, set to 0
         if isnan(cost(j,i)) || cost(j,i) == Inf || cost(j,i) == -Inf
@@ -462,11 +541,18 @@ for i = 1:6
         if isnan(mazecost(j,1)) || mazecost(j,1) == Inf || mazecost(j,1) == -Inf
             mazecost(j,1) = 0;
         end
+        if isnan(mazecost_(j,1)) || mazecost_(j,1) == Inf || mazecost_(j,1) == -Inf
+            mazecost_(j,1) = 0;
+        end
 
+
+        %% Calculating Dose Rates for Direct Distances
         if cbx_idr.Value
-            InDoseRate(i) = (designLimitEditField{i}.Value * F * (doseEditField.Value / (rateEditField.Value * 60)) * (workload/8))/distanceEditField{i}.Value^2;
+            % Do = P*F*t*tr/day = [uSv/h*h*tr/8h] TADR
+            InDoseRate(i) = (designLimitEditField{i}.Value * F * (doseEditField.Value / (rateEditField.Value * 60)) * (treatmentsidrEditField.Value/8));
         else
-            InDoseRate(i) = (activityEditField.Value * numberSourcesEditField.Value * selectedSource.RAKR) / (40*distanceEditField{i}.Value^2);
+            % Do = RAKR*A*n/d^2
+            InDoseRate(i) = (activityEditField.Value * numberSourcesEditField.Value * selectedSource.RAKR) / (distanceEditField{i}.Value^2);
         end
 
         % Check if Activity is valid; if not, set to 0
@@ -484,9 +570,11 @@ for i = 1:6
         % Update the table data for the current material and distance
         tableData{j,1} = material;
         tableData{j,2*i} = sprintf('%.2f mm', ceil(thickness(j,i)));  % Thickness in mm
-        tableData{j, 2*i+1} = sprintf('€ %.2f', cost(j,i));        % Cost in EUR
+        tableData{j,2*i+1} = sprintf('€ %.2f', cost(j,i));        % Cost in EUR
         tableData{j,14} = sprintf('%.2f mm', ceil(mazethickness(j,1)));
-        tableData{j,15} = sprintf('€ %.2f', mazecost(j,1));
+        tableData{j,15} = sprintf('€ %.2e', mazecost(j,1));
+        tableData{j,16} = sprintf('%.2f mm', ceil(mazethickness_(j,1)));
+        tableData{j,17} = sprintf('€ %.2e', mazecost_(j,1));
 
         %Update the shield data for material and distance
         shieldData{1,1} = sprintf('No Shielding');
@@ -518,13 +606,133 @@ for i = 1:6
             end
         end
 
-
         if DoseRate(j,i) < designLimitEditField{i}.Value
             addStyle(shieldTable,s3,'cell',[j+1,i+1]);
         elseif DoseRate(j,i) == designLimitEditField{i}.Value
             addStyle(shieldTable,s2,'cell',[j+1,i+1]);
         else
             addStyle(shieldTable,s1,'cell',[j+1,i+1]);
+        end
+    end
+end
+
+%% CALCULATING Dose Rates for diagonally incident radiation
+% Preallocate matrices
+hypdist = zeros(4, 6); % Pairwise distances
+hypth = zeros(3, 4, 6);   % Pairwise thicknesses
+hypInDoseRate = zeros(1, 24); % Dose rate at 12 points
+hypDoseRate = zeros(3, 24); % Dose rate per material at 12 points
+
+% Calculate pairwise distances and thicknesses
+idx = 1;
+for i = 1:4
+    for j = 1:6
+        for k = 1:length(materials)
+            % Exclude invalid pairs
+            if i == j || (i == 1 && j == 3) || (i == 2 && j == 1) || (i == 2 && j == 3) || (i == 2 && j == 4) || (i == 3 && j == 1) || (i == 4 && j == 1) || (i == 4 && j == 2) || (i == 4 && j == 3)
+                hypdist(i, j) = 0;
+                hypth(k, i, j) = 0;
+                hypInDoseRate(idx) = 0;
+                hypDoseRate(k, idx) = 0;
+            else
+                % Calculate distance and thickness
+                if i <= length(distanceEditField)
+                    hypdist(i, j) = sqrt(distanceEditField{i}.Value^2 + distanceEditField{j}.Value^2);
+                else
+                    hypdist(i, j) = 0; % Handle invalid indexing
+                end
+                if k <= size(thickness, 1) && i <= size(thickness, 2) && j <= size(thickness, 2)
+                    hypth(k, i, j) = sqrt(thickness(k, i)^2 + thickness(k, j)^2);
+                else
+                    hypth(k, i, j) = 0; % Handle invalid indexing
+                end
+
+                % Calculate dose rate based on mode
+                if cbx_idr.Value
+                    % IDR mode
+                    hypInDoseRate(idx) = designLimitEditField{j}.Value * F * (doseEditField.Value / (rateEditField.Value * 60)) * (treatmentsidrEditField.Value / 8);
+                else
+                    % Instantaneous Dose Rate
+                    if hypdist(i, j) ~= 0
+                        hypInDoseRate(idx) = (activityEditField.Value * numberSourcesEditField.Value * selectedSource.RAKR) / (hypdist(i, j)^2);
+                    else
+                        hypInDoseRate(idx) = 0;
+                    end
+                end
+
+                % Dose rate after shielding
+                if hypInDoseRate(idx) > 0 && ~isnan(hypInDoseRate(idx))
+                    hypDoseRate(k, idx) = hypInDoseRate(idx) * exp(-selectedSource.(materials{k}) * density.(materials{k}) * ceil(hypth(k, i, j)));
+                else
+                    hypDoseRate(k, idx) = 0;
+                end
+            end
+
+            % Increment index safely
+            idx = idx + 1;
+            if idx > numel(hypInDoseRate)
+                break;
+            end
+        end
+        if idx > numel(hypInDoseRate)
+            break;
+        end
+    end
+    if idx > numel(hypInDoseRate)
+        break;
+    end
+end
+idx = 1;
+for i = 8:31
+    for j = 1:length(materials)
+        shieldData{1,i} = sprintf('%.2e uSv/h', hypInDoseRate(idx));
+        shieldData{j+1,i} = sprintf('%.2e uSv/h', hypDoseRate(j, idx));
+    end
+    idx = idx + 1;
+    if idx > numel(hypInDoseRate)
+        break;
+    end
+    if idx > numel(hypInDoseRate)
+        break;
+    end
+    if idx > numel(hypInDoseRate)
+        break;
+    end
+end
+
+for idx = 1:24
+    for j = 1:length(materials)
+        if cbx_idr.Value
+            if hypInDoseRate(idx) < 7.5 %uSv/h
+                addStyle(shieldTable,s3,'cell',[1,idx+7]);
+            elseif hypInDoseRate(idx) == 7.5
+                addStyle(shieldTable,s2,'cell',[1,idx+7]);
+            else
+                addStyle(shieldTable,s1,'cell',[1,idx+7]);
+            end
+        else
+            if hypInDoseRate(idx) < 3 %uSv/h (weekly)
+                addStyle(shieldTable,s3,'cell',[1,idx+7]);
+            elseif hypInDoseRate(idx) == 3
+                addStyle(shieldTable,s2,'cell',[1,idx+7]);
+            else
+                addStyle(shieldTable,s1,'cell',[1,idx+7]);
+            end
+        end
+
+        if hypDoseRate(j, idx) < designLimitEditField{7}.Value
+            addStyle(shieldTable,s3,'cell',[j+1,idx+7]);
+        elseif hypDoseRate(j, idx) == designLimitEditField{7}.Value
+            addStyle(shieldTable,s2,'cell',[j+1,idx+7]);
+        else
+            addStyle(shieldTable,s1,'cell',[j+1,idx+7]);
+        end
+        if hypDoseRate(j, idx) < designLimitEditField{8}.Value
+            addStyle(shieldTable,s3,'cell',[j+1,idx+7]);
+        elseif hypDoseRate(j, idx) == designLimitEditField{8}.Value
+            addStyle(shieldTable,s2,'cell',[j+1,idx+7]);
+        else
+            addStyle(shieldTable,s1,'cell',[j+1,idx+7]);
         end
     end
 end
@@ -549,7 +757,7 @@ for j = 1:length(materials)
         a1 = (C1*K)/((selectedSource.(material) * 1e-5)+u2*(cosd(incidentangleEditField{1}.Value)/cosd(refangleEditField{1}.Value)));
         a1_ = (C1_)/((selectedSource.(material) * 1e-5)+u2_*(cosd(incidentangleEditField{1}.Value)/cosd(refangleEditField{1}.Value)));
         a = a1 + a1_;
-        MazeDoseRate(j) = (selectedSource.RAKR*activityEditField.Value*numberSourcesEditField.Value*F/mazedistEditField{1}.Value^2)*(a*(mazeareaaEditField{1}.Value + mazeareabEditField{1}.Value)/(mazedistEditField{2}.Value^2)) + designLimitEditField{7}.Value*F;
+        MazeDoseRate(j) = (selectedSource.RAKR*activityEditField.Value*numberSourcesEditField.Value*F/mazedistEditField{1}.Value^2)*(a*(mazeareaaEditField{1}.Value + mazeareabEditField{1}.Value)/(mazedistEditField{2}.Value^2)) + designLimitEditField{8}.Value*F;
         mazeData{j,1} = material;
         mazeData{j,2} = sprintf('%.2e uSv/h', MazeDoseRate1(j));
         mazeData{j,3} = sprintf('NoMazeLeg');
@@ -575,11 +783,11 @@ for j = 1:length(materials)
         a2 = (C2*K_)/((selectedSource.(material) * 1e-5)+u22*(cosd(incidentangleEditField{2}.Value)/cosd(refangleEditField{2}.Value)));
         a2_ = (C2_)/((selectedSource.(material) * 1e-5)+u22_*(cosd(incidentangleEditField{2}.Value)/cosd(refangleEditField{2}.Value)));
         a_ = a2 + a2_;
-        MazeDoseRate(j) = ((selectedSource.RAKR*activityEditField.Value*numberSourcesEditField.Value*F/mazedistEditField{1}.Value^2)*(a*1e-2*(mazeareaaEditField{1}.Value + mazeareabEditField{1}.Value)/(mazedistEditField{2}.Value^2))) + (designLimitEditField{7}.Value*F);
+        MazeDoseRate(j) = ((selectedSource.RAKR*activityEditField.Value*numberSourcesEditField.Value*F/mazedistEditField{1}.Value^2)*(a*1e-2*(mazeareaaEditField{1}.Value + mazeareabEditField{1}.Value)/(mazedistEditField{2}.Value^2))) + (designLimitEditField{9}.Value*F);
         if isnan(MazeDoseRate(j))
             MazeDoseRate(j) = 0;
         end
-        MazeDoseRate1(j) = ((MazeDoseRate(j) - designLimitEditField{2}.Value*F)*((a_*1e-2*(mazeareaaEditField{2}.Value + mazeareabEditField{2}.Value))/((mazedistEditField{3}.Value^2)))) + (designLimitEditField{8}.Value*F);
+        MazeDoseRate1(j) = ((MazeDoseRate(j) - designLimitEditField{9}.Value*F)*((a_*1e-2*(mazeareaaEditField{2}.Value + mazeareabEditField{2}.Value))/((mazedistEditField{3}.Value^2)))) + (designLimitEditField{9}.Value*F);
         if isnan(MazeDoseRate1(j))
             MazeDoseRate1(j) = 0;
         end
@@ -591,6 +799,96 @@ for j = 1:length(materials)
         mazeData{j,1} = material;
         mazeData{j,2} = sprintf('NoMaze');
         mazeData{j,3} = sprintf('NoMaze');
+    end
+end
+
+mazeInDoseRate = cell(1,2);
+mazeDoseRate = cell(3,2);
+for j = 1:length(materials)
+    material = materials{j};
+    if cbx_onelegmaze.Value
+        mazeInDoseRate{1,1} = max(MazeDoseRate);
+        mazeInDoseRate{1,2} = 0;
+        mazeDoseRate{j,1} = mazeInDoseRate{1,1}*exp(-selectedSource.(material)*density.(material)*ceil(mazethickness(j,1)));
+        mazeDoseRate{j,2} = 0;
+        % Check if Activity is valid; if not, set to 0
+        for i = 1:2
+            if isnan(mazeInDoseRate{1,i}) || mazeInDoseRate{1,i} == Inf || mazeInDoseRate{1,i} == -Inf
+                mazeInDoseRate{1,i} = 0;
+            end
+            if isnan(mazeDoseRate{j,i}) || mazeDoseRate{j,i} == Inf || mazeDoseRate{j,i} == -Inf
+                mazeDoseRate{j,i} = 0;
+            end
+        end
+        shieldData{1,32} = sprintf('%.2e uSv/h', mazeInDoseRate{1,1});
+        shieldData{1,33} = 'NoLeg';
+        shieldData{j+1,32} = sprintf('%.2e uSv/h', mazeDoseRate{j,1});
+        shieldData{j+1,33} = 'NoLeg';
+    elseif cbx_twolegmaze.Value
+        for i = 1:2
+            mazeInDoseRate{1,1} = max(MazeDoseRate);
+            mazeInDoseRate{1,2} = max(MazeDoseRate1);
+            mazeDoseRate{j,1} = mazeInDoseRate{1,1}*exp(-selectedSource.(material)*density.(material)*ceil(mazethickness(j,1)));
+            mazeDoseRate{j,2} = mazeInDoseRate{1,2}*exp(-selectedSource.(material)*density.(material)*ceil(mazethickness_(j,1)));
+            if isnan(mazeInDoseRate{1,i}) || mazeInDoseRate{1,i} == Inf || mazeInDoseRate{1,i} == -Inf
+                mazeInDoseRate{1,i} = 0;
+            end
+            if isnan(mazeDoseRate{j,i}) || mazeDoseRate{j,i} == Inf || mazeDoseRate{j,i} == -Inf
+                mazeDoseRate{j,i} = 0;
+            end
+        end
+        shieldData{1,32} = sprintf('%.2e uSv/h', mazeInDoseRate{1,1});
+        shieldData{1,33} = sprintf('%.2e uSv/h', mazeInDoseRate{1,2});
+        shieldData{j+1,32} = sprintf('%.2e uSv/h', mazeDoseRate{j,1});
+        shieldData{j+1,33} = sprintf('%.2e uSv/h', mazeDoseRate{j,2});
+    else
+        for i = 1:2
+            mazeInDoseRate{1,i} = 0;
+            mazeDoseRate{j,i} = 0;
+        end
+        shieldData{1,32} = 'NoLeg';
+        shieldData{1,33} = 'NoLeg';
+        shieldData{j+1,32} = 'NoLeg';
+        shieldData{j+1,33} = 'NoLeg';
+    end
+
+    s1 = uistyle('BackgroundColor','r');
+    s2 = uistyle('BackgroundColor','y');
+    s3 = uistyle('BackgroundColor','g');
+
+    for i = 1:2
+        if cbx_idr.Value
+            if mazeInDoseRate{1,i} < 7.5 %uSv/h
+                addStyle(shieldTable,s3,'cell',[1,i+31]);
+            elseif mazeInDoseRate{1,i} == 7.5
+                addStyle(shieldTable,s2,'cell',[1,i+31]);
+            else
+                addStyle(shieldTable,s1,'cell',[1,i+31]);
+            end
+        else
+            if mazeInDoseRate{1,i} < 3 %uSv/h (weekly)
+                addStyle(shieldTable,s3,'cell',[1,i+31]);
+            elseif mazeInDoseRate{1,i} == 3
+                addStyle(shieldTable,s2,'cell',[1,i+31]);
+            else
+                addStyle(shieldTable,s1,'cell',[1,i+31]);
+            end
+        end
+
+        if mazeDoseRate{j,1} < designLimitEditField{7}.Value
+            addStyle(shieldTable,s3,'cell',[j+1,32]);
+        elseif mazeDoseRate{j,i} == designLimitEditField{7}.Value
+            addStyle(shieldTable,s2,'cell',[j+1,32]);
+        else
+            addStyle(shieldTable,s1,'cell',[j+1,32]);
+        end
+        if mazeDoseRate{j,2} < designLimitEditField{8}.Value
+            addStyle(shieldTable,s3,'cell',[j+1,33]);
+        elseif mazeDoseRate{j,2} == designLimitEditField{8}.Value
+            addStyle(shieldTable,s2,'cell',[j+1,33]);
+        else
+            addStyle(shieldTable,s1,'cell',[j+1,33]);
+        end
     end
 end
 
