@@ -16,7 +16,7 @@ shieldingTab.Scrollable = "on";
 %Panels
 workloadPanel = uipanel(shieldingTab, 'Title', 'Workload', 'Position', [10, 430, 150, 200], 'BackgroundColor',[0.8 0.8 0.8], 'FontWeight', 'bold');
 distancesPanel = uipanel(shieldingTab, 'Title', 'Wall Distances from Source', 'Position', [165, 430, 210, 200], 'BackgroundColor',[0.8 0.8 0.8], 'FontWeight', 'bold');
-designparameteresPanel = uipanel(shieldingTab, 'Title', 'Design Parameters', 'Position', [605, 430, 300, 200], 'BackgroundColor',[0.8 0.8 0.8], 'FontWeight', 'bold', 'Scrollable', 'on');
+designparameteresPanel = uipanel(shieldingTab, 'Title', 'Design Parameters', 'Position', [605, 110, 300, 520], 'BackgroundColor',[0.8 0.8 0.8], 'FontWeight', 'bold', 'Scrollable', 'on');
 areasPanel = uipanel(shieldingTab, 'Title', 'Wall Areas', 'Position', [380, 430, 220, 200], 'BackgroundColor',[0.8 0.8 0.8], 'FontWeight', 'bold');
 anglesPanel = uipanel(shieldingTab, 'Title', 'Angles', 'Position', [910, 545, 180, 85], 'BackgroundColor',[0.8 0.8 0.8], 'FontWeight', 'bold');
 pricesPanel = uipanel(shieldingTab, 'Title', 'Material Prices', 'Position', [910, 430, 180, 110], 'BackgroundColor',[0.8 0.8 0.8], 'FontWeight', 'bold');
@@ -123,25 +123,28 @@ areaEditField = cell(1,6);
 for i = 1:6
     distanceLabel{i} = uilabel(distancesPanel, 'Text', ['d_{' num2str(i) '}[m]'], 'Interpreter', 'tex', 'Position', [10, 150-(i-1)*25, 75, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
     areaLabel{i} = uilabel(areasPanel, 'Text', ['A_{' num2str(i) '}[m^{2}]'], 'Interpreter', 'tex', 'Position', [10, 150-(i-1)*25, 50, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
-    designLimitLabel{i} = uilabel(designparameteresPanel, 'Text', 'P[μGy]', 'Interpreter', 'tex', 'Position', [10, 190-(i-1)*25, 40, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+    designLimitLabel{i} = uilabel(designparameteresPanel, 'Text', 'P[μGy]', 'Interpreter', 'tex', 'Position', [10, 510-(i-1)*25, 40, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
     distanceEditField{i} = uieditfield(distancesPanel, 'numeric', 'Position', [50, 150-(i-1)*25, 48, 22], "ValueDisplayFormat", "%.2f");
     areaEditField{i} = uieditfield(areasPanel, 'numeric', 'Position', [50, 150-(i-1)*25, 48, 22], "ValueDisplayFormat", "%.2f");
 end
-designLimitLabel{7} = uilabel(designparameteresPanel, 'Text', 'P_{m1}', 'Interpreter', 'tex', 'Position', [10, 40, 40, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
-designLimitLabel{8} = uilabel(designparameteresPanel, 'Text', 'P_{m2}', 'Interpreter', 'tex', 'Position', [10, 15, 40, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
-designLimitLabel{9} = uilabel(designparameteresPanel, 'Text', 'P_{m3}', 'Interpreter', 'tex', 'Position', [10, -10, 40, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+for i = 7:9
+    designLimitLabel{i} = uilabel(designparameteresPanel, 'Text', ['P_m{' num2str(i-6) '}'], 'Interpreter', 'tex', 'Position', [10, 360-(i-7)*25, 40, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+end
+for i = 10:21
+    designLimitLabel{i} = uilabel(designparameteresPanel, 'Text', ['P_d{' num2str(i-9) '}'], 'Interpreter', 'tex', 'Position', [10, 285-(i-10)*25, 40, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+end
 
 occupationFactorLabel = cell(1,9);
 designLimitAreaDropdown = cell(1,9);
 designLimitEditField = cell(1,9);
 occupationFactorEditField = cell(1,9);
 cbx_contamination = cell(1,9);
-for i = 1:9
-    occupationFactorLabel{i} = uilabel(designparameteresPanel, 'Text', 'T', 'Interpreter', 'tex', 'Position', [210, 190-(i-1)*25, 30, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
-    designLimitAreaDropdown{i} = uidropdown(designparameteresPanel, "Items", ["Select", "Controlled Area", "Uncontrolled Area", "Public Area"], 'Position', [50, 190-(i-1)*25, 65, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
-    designLimitEditField{i} = uieditfield(designparameteresPanel, 'numeric', 'Position', [120, 190-(i-1)*25, 48, 22], "ValueDisplayFormat", "%.2f", 'Editable', 'off');
-    occupationFactorEditField{i} = uieditfield(designparameteresPanel, 'numeric', 'Position', [220, 190-(i-1)*25, 48, 22], "ValueDisplayFormat", "%.2f");
-    cbx_contamination{i} = uicheckbox(designparameteresPanel,"Text","C",'Position',[170, 190-(i-1)*25, 30, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+for i = 1:21
+    occupationFactorLabel{i} = uilabel(designparameteresPanel, 'Text', 'T', 'Interpreter', 'tex', 'Position', [210, 510-(i-1)*25, 30, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+    designLimitAreaDropdown{i} = uidropdown(designparameteresPanel, "Items", ["Select", "Controlled Area", "Uncontrolled Area", "Public Area"], 'Position', [50, 510-(i-1)*25, 65, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+    designLimitEditField{i} = uieditfield(designparameteresPanel, 'numeric', 'Position', [120, 510-(i-1)*25, 48, 22], "ValueDisplayFormat", "%.2f", 'Editable', 'off');
+    occupationFactorEditField{i} = uieditfield(designparameteresPanel, 'numeric', 'Position', [220, 510-(i-1)*25, 48, 22], "ValueDisplayFormat", "%.2f");
+    cbx_contamination{i} = uicheckbox(designparameteresPanel,"Text","C",'Position',[170, 510-(i-1)*25, 30, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
 
     % Callback to designLimitAreaDropdown to update designLimitEditField
     designLimitAreaDropdown{i}.ValueChangedFcn = @(dd, event) setDesignLimit(dd, designLimitEditField{i}, cbx_idr);
@@ -211,18 +214,18 @@ end
 % Create the table in the UI (positioned at the bottom for displaying results)
 resultTable = uitable(shieldingTab, 'Data', tableData, 'ColumnName', columnNames, 'Position', [10, 300, 500, 117], 'ColumnWidth', repmat({76}, 1, 12));
 
-shieldData = cell(4,33); % Cell array for the shielding data
+shieldData = cell(4,21); % Cell array for the shielding data
 %Column headers for shielding table
-columnNames1 = cell(1,33);
+columnNames1 = cell(1,21);
 columnNames1{1} = 'Shielding';
 for i = 1:6
     columnNames1{i+1} = ['Distance' num2str(i)];
 end
-for i = 8:31
+for i = 8:19
     columnNames1{i} = ['DiagDistance' num2str(i-7)];
 end
-for i = 32:33
-    columnNames1{i} = ['Leg' num2str(i-31)];
+for i = 20:21
+    columnNames1{i} = ['Leg' num2str(i-19)];
 end
 shieldTable = uitable(shieldingTab, 'Data', shieldData, 'ColumnName', columnNames1, 'Position', [10, 180, 500, 117], 'ColumnWidth', repmat({95}, 1, 6));
 
@@ -624,8 +627,8 @@ hypInDoseRate = zeros(1, 24); % Dose rate at 12 points
 hypDoseRate = zeros(3, 24); % Dose rate per material at 12 points
 
 % Calculate pairwise distances and thicknesses
-idx = 1;
 for k = 1:length(materials)
+    idx = 1;
     for i = 1:4
         for j = 1:6
             % Exclude invalid pairs
@@ -650,7 +653,7 @@ for k = 1:length(materials)
                 % Calculate dose rate based on mode
                 if cbx_idr.Value
                     % IDR mode
-                    hypInDoseRate(idx) = designLimitEditField{j}.Value * F * (doseEditField.Value / (rateEditField.Value * 60)) * (treatmentsidrEditField.Value / 8);
+                    hypInDoseRate(idx) = designLimitEditField{j+15}.Value * F * (doseEditField.Value / (rateEditField.Value * 60)) * (treatmentsidrEditField.Value / 8);
                 else
                     % Instantaneous Dose Rate
                     if hypdist(i, j) ~= 0
@@ -667,45 +670,28 @@ for k = 1:length(materials)
                     hypDoseRate(k, idx) = 0;
                 end
             end
-
-            % Increment index safely
+            % Increment index for this combination
             idx = idx + 1;
-            if idx > numel(hypInDoseRate)
-                break;
-            end
         end
-        if idx > numel(hypInDoseRate)
-            break;
-        end
-    end
-    if idx > numel(hypInDoseRate)
-        break;
     end
 end
+
 idx = 1;
 for i = 8:31
     for j = 1:length(materials)
-        if i == 8 || i == 10 || i == 14 || i ==15 || i == 16 || i == 17 || i == 22 || i == 26 || i == 27 || i == 28 || i == 29
-            shieldData{1,i} = [];
-            shieldData{j+1,i} = [];
-        else
-            shieldData{1,i} = sprintf('%.2e uSv/h', hypInDoseRate(idx));
-            shieldData{j+1,i} = sprintf('%.2e uSv/h', hypDoseRate(j, idx));
-        end
+        shieldData{1,i} = sprintf('%.2e uSv/h', hypInDoseRate(idx));
+        shieldData{j+1,i} = sprintf('%.2e uSv/h', hypDoseRate(j, idx));
     end
     idx = idx + 1;
     if idx > numel(hypInDoseRate)
         break;
     end
-    if idx > numel(hypInDoseRate)
-        break;
-    end
-    if idx > numel(hypInDoseRate)
-        break;
-    end
 end
+columnsToDelete = [8, 10, 14, 15, 16, 17, 20, 22, 26, 27, 28, 29];
+shieldData(:, columnsToDelete) = [];
 
-for idx = 1:24
+for i = 8:19
+for idx = 1:12
     for j = 1:length(materials)
         if cbx_idr.Value
             if hypInDoseRate(idx) < 7.5 %uSv/h
@@ -725,21 +711,22 @@ for idx = 1:24
             end
         end
 
-        if hypDoseRate(j, idx) < designLimitEditField{7}.Value
+        if hypDoseRate(j, idx) < designLimitEditField{i}.Value
             addStyle(shieldTable,s3,'cell',[j+1,idx+7]);
-        elseif hypDoseRate(j, idx) == designLimitEditField{7}.Value
+        elseif hypDoseRate(j, idx) == designLimitEditField{i}.Value
             addStyle(shieldTable,s2,'cell',[j+1,idx+7]);
         else
             addStyle(shieldTable,s1,'cell',[j+1,idx+7]);
         end
-        if hypDoseRate(j, idx) < designLimitEditField{8}.Value
+        if hypDoseRate(j, idx) < designLimitEditField{i}.Value
             addStyle(shieldTable,s3,'cell',[j+1,idx+7]);
-        elseif hypDoseRate(j, idx) == designLimitEditField{8}.Value
+        elseif hypDoseRate(j, idx) == designLimitEditField{i}.Value
             addStyle(shieldTable,s2,'cell',[j+1,idx+7]);
         else
             addStyle(shieldTable,s1,'cell',[j+1,idx+7]);
         end
     end
+end
 end
 
 %% CALCULATE DOSE RATES AT MAZE
@@ -825,10 +812,10 @@ for j = 1:length(materials)
                 mazeDoseRate{j,i} = 0;
             end
         end
-        shieldData{1,32} = sprintf('%.2e uSv/h', mazeInDoseRate{1,1});
-        shieldData{1,33} = 'NoLeg';
-        shieldData{j+1,32} = sprintf('%.2e uSv/h', mazeDoseRate{j,1});
-        shieldData{j+1,33} = 'NoLeg';
+        shieldData{1,20} = sprintf('%.2e uSv/h', mazeInDoseRate{1,1});
+        shieldData{1,21} = 'NoLeg';
+        shieldData{j+1,20} = sprintf('%.2e uSv/h', mazeDoseRate{j,1});
+        shieldData{j+1,21} = 'NoLeg';
     elseif cbx_twolegmaze.Value
         for i = 1:2
             mazeInDoseRate{1,1} = max(MazeDoseRate);
@@ -842,19 +829,19 @@ for j = 1:length(materials)
                 mazeDoseRate{j,i} = 0;
             end
         end
-        shieldData{1,32} = sprintf('%.2e uSv/h', mazeInDoseRate{1,1});
-        shieldData{1,33} = sprintf('%.2e uSv/h', mazeInDoseRate{1,2});
-        shieldData{j+1,32} = sprintf('%.2e uSv/h', mazeDoseRate{j,1});
-        shieldData{j+1,33} = sprintf('%.2e uSv/h', mazeDoseRate{j,2});
+        shieldData{1,20} = sprintf('%.2e uSv/h', mazeInDoseRate{1,1});
+        shieldData{1,21} = sprintf('%.2e uSv/h', mazeInDoseRate{1,2});
+        shieldData{j+1,20} = sprintf('%.2e uSv/h', mazeDoseRate{j,1});
+        shieldData{j+1,21} = sprintf('%.2e uSv/h', mazeDoseRate{j,2});
     else
         for i = 1:2
             mazeInDoseRate{1,i} = 0;
             mazeDoseRate{j,i} = 0;
         end
-        shieldData{1,32} = 'NoLeg';
-        shieldData{1,33} = 'NoLeg';
-        shieldData{j+1,32} = 'NoLeg';
-        shieldData{j+1,33} = 'NoLeg';
+        shieldData{1,20} = 'NoLeg';
+        shieldData{1,21} = 'NoLeg';
+        shieldData{j+1,20} = 'NoLeg';
+        shieldData{j+1,21} = 'NoLeg';
     end
 
     s1 = uistyle('BackgroundColor','r');
@@ -864,35 +851,35 @@ for j = 1:length(materials)
     for i = 1:2
         if cbx_idr.Value
             if mazeInDoseRate{1,i} < 7.5 %uSv/h
-                addStyle(shieldTable,s3,'cell',[1,i+31]);
+                addStyle(shieldTable,s3,'cell',[1,i+19]);
             elseif mazeInDoseRate{1,i} == 7.5
-                addStyle(shieldTable,s2,'cell',[1,i+31]);
+                addStyle(shieldTable,s2,'cell',[1,i+19]);
             else
-                addStyle(shieldTable,s1,'cell',[1,i+31]);
+                addStyle(shieldTable,s1,'cell',[1,i+19]);
             end
         else
             if mazeInDoseRate{1,i} < 3 %uSv/h (weekly)
-                addStyle(shieldTable,s3,'cell',[1,i+31]);
+                addStyle(shieldTable,s3,'cell',[1,i+19]);
             elseif mazeInDoseRate{1,i} == 3
-                addStyle(shieldTable,s2,'cell',[1,i+31]);
+                addStyle(shieldTable,s2,'cell',[1,i+19]);
             else
-                addStyle(shieldTable,s1,'cell',[1,i+31]);
+                addStyle(shieldTable,s1,'cell',[1,i+19]);
             end
         end
 
         if mazeDoseRate{j,1} < designLimitEditField{7}.Value
-            addStyle(shieldTable,s3,'cell',[j+1,32]);
+            addStyle(shieldTable,s3,'cell',[j+1,20]);
         elseif mazeDoseRate{j,i} == designLimitEditField{7}.Value
-            addStyle(shieldTable,s2,'cell',[j+1,32]);
+            addStyle(shieldTable,s2,'cell',[j+1,20]);
         else
-            addStyle(shieldTable,s1,'cell',[j+1,32]);
+            addStyle(shieldTable,s1,'cell',[j+1,20]);
         end
         if mazeDoseRate{j,2} < designLimitEditField{8}.Value
-            addStyle(shieldTable,s3,'cell',[j+1,33]);
+            addStyle(shieldTable,s3,'cell',[j+1,21]);
         elseif mazeDoseRate{j,2} == designLimitEditField{8}.Value
-            addStyle(shieldTable,s2,'cell',[j+1,33]);
+            addStyle(shieldTable,s2,'cell',[j+1,21]);
         else
-            addStyle(shieldTable,s1,'cell',[j+1,33]);
+            addStyle(shieldTable,s1,'cell',[j+1,21]);
         end
     end
 end
