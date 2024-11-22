@@ -16,7 +16,7 @@ shieldingTab.Scrollable = "on";
 %Panels
 workloadPanel = uipanel(shieldingTab, 'Title', 'Workload', 'Position', [10, 430, 150, 200], 'BackgroundColor',[0.8 0.8 0.8], 'FontWeight', 'bold');
 distancesPanel = uipanel(shieldingTab, 'Title', 'Wall Distances from Source', 'Position', [165, 430, 210, 200], 'BackgroundColor',[0.8 0.8 0.8], 'FontWeight', 'bold');
-designparameteresPanel = uipanel(shieldingTab, 'Title', 'Design Parameters', 'Position', [605, 110, 300, 520], 'BackgroundColor',[0.8 0.8 0.8], 'FontWeight', 'bold', 'Scrollable', 'on');
+designparameteresPanel = uipanel(shieldingTab, 'Title', 'Design Parameters', 'Position', [605, 430, 300, 200], 'BackgroundColor',[0.8 0.8 0.8], 'FontWeight', 'bold', 'Scrollable', 'on');
 areasPanel = uipanel(shieldingTab, 'Title', 'Wall Areas', 'Position', [380, 430, 220, 200], 'BackgroundColor',[0.8 0.8 0.8], 'FontWeight', 'bold');
 anglesPanel = uipanel(shieldingTab, 'Title', 'Angles', 'Position', [910, 545, 180, 85], 'BackgroundColor',[0.8 0.8 0.8], 'FontWeight', 'bold');
 pricesPanel = uipanel(shieldingTab, 'Title', 'Material Prices', 'Position', [910, 430, 180, 110], 'BackgroundColor',[0.8 0.8 0.8], 'FontWeight', 'bold');
@@ -123,18 +123,18 @@ areaEditField = cell(1,6);
 for i = 1:6
     distanceLabel{i} = uilabel(distancesPanel, 'Text', ['d_{' num2str(i) '}[m]'], 'Interpreter', 'tex', 'Position', [10, 150-(i-1)*25, 75, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
     areaLabel{i} = uilabel(areasPanel, 'Text', ['A_{' num2str(i) '}[m^{2}]'], 'Interpreter', 'tex', 'Position', [10, 150-(i-1)*25, 50, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
-    designLimitLabel{i} = uilabel(designparameteresPanel, 'Text', 'P[μGy]', 'Interpreter', 'tex', 'Position', [10, 510-(i-1)*25, 40, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+    designLimitLabel{i} = uilabel(designparameteresPanel, 'Text', 'P[μGy]', 'Interpreter', 'tex', 'Position', [10, 710-(i-1)*25, 40, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
     distanceEditField{i} = uieditfield(distancesPanel, 'numeric', 'Position', [50, 150-(i-1)*25, 48, 22], "ValueDisplayFormat", "%.2f");
     areaEditField{i} = uieditfield(areasPanel, 'numeric', 'Position', [50, 150-(i-1)*25, 48, 22], "ValueDisplayFormat", "%.2f");
 end
 for i = 7:9
-    designLimitLabel{i} = uilabel(designparameteresPanel, 'Text', ['P_m{' num2str(i-6) '}'], 'Interpreter', 'tex', 'Position', [10, 360-(i-7)*25, 40, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+    designLimitLabel{i} = uilabel(designparameteresPanel, 'Text', ['P_m{' num2str(i-6) '}'], 'Interpreter', 'tex', 'Position', [10, 560-(i-7)*25, 40, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
 end
 for i = 10:21
-    designLimitLabel{i} = uilabel(designparameteresPanel, 'Text', ['P_e{' num2str(i-9) '}'], 'Interpreter', 'tex', 'Position', [10, 285-(i-10)*25, 40, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+    designLimitLabel{i} = uilabel(designparameteresPanel, 'Text', ['P_e{' num2str(i-9) '}'], 'Interpreter', 'tex', 'Position', [10, 485-(i-10)*25, 40, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
 end
 for i = 22:29
-    designLimitLabel{i} = uilabel(designparameteresPanel, 'Text', ['P_c{' num2str(i-21) '}'], 'Interpreter', 'tex', 'Position', [10, -15-(i-22)*25, 40, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+    designLimitLabel{i} = uilabel(designparameteresPanel, 'Text', ['P_c{' num2str(i-21) '}'], 'Interpreter', 'tex', 'Position', [10, 185-(i-22)*25, 40, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
 end
 
 occupationFactorLabel = cell(1,29);
@@ -143,11 +143,11 @@ designLimitEditField = cell(1,29);
 occupationFactorEditField = cell(1,29);
 cbx_contamination = cell(1,29);
 for i = 1:29
-    occupationFactorLabel{i} = uilabel(designparameteresPanel, 'Text', 'T', 'Interpreter', 'tex', 'Position', [210, 510-(i-1)*25, 30, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
-    designLimitAreaDropdown{i} = uidropdown(designparameteresPanel, "Items", ["Select", "Controlled Area", "Uncontrolled Area", "Public Area"], 'Position', [50, 510-(i-1)*25, 65, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
-    designLimitEditField{i} = uieditfield(designparameteresPanel, 'numeric', 'Position', [120, 510-(i-1)*25, 48, 22], "ValueDisplayFormat", "%.2f", 'Editable', 'off');
-    occupationFactorEditField{i} = uieditfield(designparameteresPanel, 'numeric', 'Position', [220, 510-(i-1)*25, 48, 22], "ValueDisplayFormat", "%.2f");
-    cbx_contamination{i} = uicheckbox(designparameteresPanel,"Text","C",'Position',[170, 510-(i-1)*25, 30, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+    occupationFactorLabel{i} = uilabel(designparameteresPanel, 'Text', 'T', 'Interpreter', 'tex', 'Position', [210, 710-(i-1)*25, 30, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+    designLimitAreaDropdown{i} = uidropdown(designparameteresPanel, "Items", ["Select", "Controlled Area", "Uncontrolled Area", "Public Area"], 'Position', [50, 710-(i-1)*25, 65, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+    designLimitEditField{i} = uieditfield(designparameteresPanel, 'numeric', 'Position', [120, 710-(i-1)*25, 48, 22], "ValueDisplayFormat", "%.2f", 'Editable', 'off');
+    occupationFactorEditField{i} = uieditfield(designparameteresPanel, 'numeric', 'Position', [220, 710-(i-1)*25, 48, 22], "ValueDisplayFormat", "%.2f");
+    cbx_contamination{i} = uicheckbox(designparameteresPanel,"Text","C",'Position',[170, 710-(i-1)*25, 30, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
 
     % Callback to designLimitAreaDropdown to update designLimitEditField
     designLimitAreaDropdown{i}.ValueChangedFcn = @(dd, event) setDesignLimit(dd, designLimitEditField{i}, cbx_idr);
@@ -215,7 +215,7 @@ for i = 1:6
     columnNames{2*i+1} = ['Cost' num2str(i)];
 end
 % Create the table in the UI (positioned at the bottom for displaying results)
-resultTable = uitable(shieldingTab, 'Data', tableData, 'ColumnName', columnNames, 'Position', [10, 300, 500, 117], 'ColumnWidth', repmat({76}, 1, 12));
+resultTable = uitable(shieldingTab, 'Data', tableData, 'ColumnName', columnNames, 'Position', [10, 300, 1200, 117], 'ColumnWidth', repmat({76}, 1, 12));
 
 shieldData = cell(4,29); % Cell array for the shielding data
 %Column headers for shielding table
@@ -233,7 +233,7 @@ end
 for i = 28:29
     columnNames1{i} = ['Leg' num2str(i-27)];
 end
-shieldTable = uitable(shieldingTab, 'Data', shieldData, 'ColumnName', columnNames1, 'Position', [10, 180, 500, 117], 'ColumnWidth', repmat({95}, 1, 6));
+shieldTable = uitable(shieldingTab, 'Data', shieldData, 'ColumnName', columnNames1, 'Position', [10, 180, 1200, 117], 'ColumnWidth', repmat({95}, 1, 6));
 
 %Column headers for maze entrance DR table
 mazeData = cell(3,3);
@@ -242,7 +242,7 @@ columnNames2{1} = 'Materials';
 for i = 1:2
     columnNames2{i+1} = ['MazeLeg' num2str(i)];
 end
-mazeTable = uitable(shieldingTab, 'Data', mazeData, 'ColumnName', columnNames2, 'Position', [10, 75, 327, 99], 'ColumnWidth', repmat({95}, 1, 6));
+mazeTable = uitable(shieldingTab, 'Data', mazeData, 'ColumnName', columnNames2, 'Position', [450, 75, 327, 99], 'ColumnWidth', repmat({95}, 1, 6));
 
 %% Setting up Callback Functions
 % Adding the Save button for exporting table data to an Excel file
