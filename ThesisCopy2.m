@@ -16,7 +16,7 @@ shieldingTab.Scrollable = "on";
 %Panels
 workloadPanel = uipanel(shieldingTab, 'Title', 'Workload', 'Position', [10, 430, 150, 200], 'BackgroundColor',[0.8 0.8 0.8], 'FontWeight', 'bold');
 distancesPanel = uipanel(shieldingTab, 'Title', 'Wall Distances from Source', 'Position', [165, 430, 210, 200], 'BackgroundColor',[0.8 0.8 0.8], 'FontWeight', 'bold');
-designparameteresPanel = uipanel(shieldingTab, 'Title', 'Design Parameters', 'Position', [605, 430, 300, 200], 'BackgroundColor',[0.8 0.8 0.8], 'FontWeight', 'bold', 'Scrollable', 'on');
+designparameteresPanel = uipanel(shieldingTab, 'Title', 'Design Parameters', 'Position', [605, 110, 300, 520], 'BackgroundColor',[0.8 0.8 0.8], 'FontWeight', 'bold', 'Scrollable', 'on');
 areasPanel = uipanel(shieldingTab, 'Title', 'Wall Areas', 'Position', [380, 430, 220, 200], 'BackgroundColor',[0.8 0.8 0.8], 'FontWeight', 'bold');
 anglesPanel = uipanel(shieldingTab, 'Title', 'Angles', 'Position', [910, 545, 180, 85], 'BackgroundColor',[0.8 0.8 0.8], 'FontWeight', 'bold');
 pricesPanel = uipanel(shieldingTab, 'Title', 'Material Prices', 'Position', [910, 430, 180, 110], 'BackgroundColor',[0.8 0.8 0.8], 'FontWeight', 'bold');
@@ -117,31 +117,37 @@ treatmentsidrEditField = uieditfield(workloadPanel, 'numeric', 'Position', [85, 
 % Labels and Edit Fields for Transmission Factor Calculations
 distanceLabel = cell(1,6);
 areaLabel = cell(1,6);
-designLimitLabel = cell(1,9);
+designLimitLabel = cell(1,29);
 distanceEditField = cell(1,6);
 areaEditField = cell(1,6);
 for i = 1:6
     distanceLabel{i} = uilabel(distancesPanel, 'Text', ['d_{' num2str(i) '}[m]'], 'Interpreter', 'tex', 'Position', [10, 150-(i-1)*25, 75, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
     areaLabel{i} = uilabel(areasPanel, 'Text', ['A_{' num2str(i) '}[m^{2}]'], 'Interpreter', 'tex', 'Position', [10, 150-(i-1)*25, 50, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
-    designLimitLabel{i} = uilabel(designparameteresPanel, 'Text', 'P[μGy]', 'Interpreter', 'tex', 'Position', [10, 190-(i-1)*25, 40, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+    designLimitLabel{i} = uilabel(designparameteresPanel, 'Text', 'P[μGy]', 'Interpreter', 'tex', 'Position', [10, 510-(i-1)*25, 40, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
     distanceEditField{i} = uieditfield(distancesPanel, 'numeric', 'Position', [50, 150-(i-1)*25, 48, 22], "ValueDisplayFormat", "%.2f");
     areaEditField{i} = uieditfield(areasPanel, 'numeric', 'Position', [50, 150-(i-1)*25, 48, 22], "ValueDisplayFormat", "%.2f");
 end
-designLimitLabel{7} = uilabel(designparameteresPanel, 'Text', 'P_{m1}', 'Interpreter', 'tex', 'Position', [10, 40, 40, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
-designLimitLabel{8} = uilabel(designparameteresPanel, 'Text', 'P_{m2}', 'Interpreter', 'tex', 'Position', [10, 15, 40, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
-designLimitLabel{9} = uilabel(designparameteresPanel, 'Text', 'P_{m3}', 'Interpreter', 'tex', 'Position', [10, -10, 40, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+for i = 7:9
+    designLimitLabel{i} = uilabel(designparameteresPanel, 'Text', ['P_m{' num2str(i-6) '}'], 'Interpreter', 'tex', 'Position', [10, 360-(i-7)*25, 40, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+end
+for i = 10:21
+    designLimitLabel{i} = uilabel(designparameteresPanel, 'Text', ['P_e{' num2str(i-9) '}'], 'Interpreter', 'tex', 'Position', [10, 285-(i-10)*25, 40, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+end
+for i = 22:29
+    designLimitLabel{i} = uilabel(designparameteresPanel, 'Text', ['P_c{' num2str(i-21) '}'], 'Interpreter', 'tex', 'Position', [10, -15-(i-22)*25, 40, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+end
 
-occupationFactorLabel = cell(1,9);
-designLimitAreaDropdown = cell(1,9);
-designLimitEditField = cell(1,9);
-occupationFactorEditField = cell(1,9);
-cbx_contamination = cell(1,9);
-for i = 1:9
-    occupationFactorLabel{i} = uilabel(designparameteresPanel, 'Text', 'T', 'Interpreter', 'tex', 'Position', [210, 190-(i-1)*25, 30, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
-    designLimitAreaDropdown{i} = uidropdown(designparameteresPanel, "Items", ["Select", "Controlled Area", "Uncontrolled Area", "Public Area"], 'Position', [50, 190-(i-1)*25, 65, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
-    designLimitEditField{i} = uieditfield(designparameteresPanel, 'numeric', 'Position', [120, 190-(i-1)*25, 48, 22], "ValueDisplayFormat", "%.2f", 'Editable', 'off');
-    occupationFactorEditField{i} = uieditfield(designparameteresPanel, 'numeric', 'Position', [220, 190-(i-1)*25, 48, 22], "ValueDisplayFormat", "%.2f");
-    cbx_contamination{i} = uicheckbox(designparameteresPanel,"Text","C",'Position',[170, 190-(i-1)*25, 30, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+occupationFactorLabel = cell(1,29);
+designLimitAreaDropdown = cell(1,29);
+designLimitEditField = cell(1,29);
+occupationFactorEditField = cell(1,29);
+cbx_contamination = cell(1,29);
+for i = 1:29
+    occupationFactorLabel{i} = uilabel(designparameteresPanel, 'Text', 'T', 'Interpreter', 'tex', 'Position', [210, 510-(i-1)*25, 30, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+    designLimitAreaDropdown{i} = uidropdown(designparameteresPanel, "Items", ["Select", "Controlled Area", "Uncontrolled Area", "Public Area"], 'Position', [50, 510-(i-1)*25, 65, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+    designLimitEditField{i} = uieditfield(designparameteresPanel, 'numeric', 'Position', [120, 510-(i-1)*25, 48, 22], "ValueDisplayFormat", "%.2f", 'Editable', 'off');
+    occupationFactorEditField{i} = uieditfield(designparameteresPanel, 'numeric', 'Position', [220, 510-(i-1)*25, 48, 22], "ValueDisplayFormat", "%.2f");
+    cbx_contamination{i} = uicheckbox(designparameteresPanel,"Text","C",'Position',[170, 510-(i-1)*25, 30, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
 
     % Callback to designLimitAreaDropdown to update designLimitEditField
     designLimitAreaDropdown{i}.ValueChangedFcn = @(dd, event) setDesignLimit(dd, designLimitEditField{i}, cbx_idr);
@@ -211,18 +217,21 @@ end
 % Create the table in the UI (positioned at the bottom for displaying results)
 resultTable = uitable(shieldingTab, 'Data', tableData, 'ColumnName', columnNames, 'Position', [10, 300, 500, 117], 'ColumnWidth', repmat({76}, 1, 12));
 
-shieldData = cell(4,33); % Cell array for the shielding data
+shieldData = cell(4,29); % Cell array for the shielding data
 %Column headers for shielding table
-columnNames1 = cell(1,33);
+columnNames1 = cell(1,29);
 columnNames1{1} = 'Shielding';
 for i = 1:6
     columnNames1{i+1} = ['Distance' num2str(i)];
 end
-for i = 8:31
-    columnNames1{i} = ['DiagDistance' num2str(i-7)];
+for i = 8:19
+    columnNames1{i} = ['EdgeDistance' num2str(i-7)];
 end
-for i = 32:33
-    columnNames1{i} = ['Leg' num2str(i-31)];
+for i = 20:27
+    columnNames1{i} = ['CornerDistance' num2str(i-19)];
+end
+for i = 28:29
+    columnNames1{i} = ['Leg' num2str(i-27)];
 end
 shieldTable = uitable(shieldingTab, 'Data', shieldData, 'ColumnName', columnNames1, 'Position', [10, 180, 500, 117], 'ColumnWidth', repmat({95}, 1, 6));
 
@@ -616,74 +625,45 @@ for i = 1:6
     end
 end
 
-%% CALCULATING Dose Rates for diagonally incident radiation
+%% CALCULATING DOSE RATES FOR EDGES
 % Preallocate matrices
 hypdist = zeros(4, 6); % Pairwise distances
-hypth = zeros(3, 4, 6);   % Pairwise thicknesses
+hypth = zeros(length(materials), 4, 6);   % Pairwise thicknesses
 hypInDoseRate = zeros(1, 24); % Dose rate at 12 points
-hypDoseRate = zeros(3, 24); % Dose rate per material at 12 points
+hypDoseRate = zeros(length(materials), 24); % Dose rate per material at 12 points
 
 % Calculate pairwise distances and thicknesses
 idx = 1;
 for i = 1:4
     for j = 1:6
-        for k = 1:length(materials)
-            % Exclude invalid pairs
-            if i == j || (i == 1 && j == 3) || (i == 2 && j == 1) || (i == 2 && j == 3) || (i == 2 && j == 4) || (i == 3 && j == 1) || (i == 4 && j == 1) || (i == 4 && j == 2) || (i == 4 && j == 3)
-                hypdist(i, j) = 0;
-                hypth(k, i, j) = 0;
-                hypInDoseRate(idx) = 0;
-                hypDoseRate(k, idx) = 0;
-            else
+        % Exclude invalid pairs
+        if i == j || (i == 1 && j == 3) || (i == 2 && j == 1) || (i == 2 && j == 3) || (i == 2 && j == 4) || (i == 3 && j == 1) || (i == 4 && j == 1) || (i == 4 && j == 2) || (i == 4 && j == 3)
+            continue;
+        else
+            for k = 1:length(materials)
                 % Calculate distance and thickness
-                if i <= length(distanceEditField)
-                    hypdist(i, j) = sqrt(distanceEditField{i}.Value^2 + distanceEditField{j}.Value^2);
-                else
-                    hypdist(i, j) = 0; % Handle invalid indexing
-                end
-                if k <= size(thickness, 1) && i <= size(thickness, 2) && j <= size(thickness, 2)
-                    hypth(k, i, j) = sqrt(thickness(k, i)^2 + thickness(k, j)^2);
-                else
-                    hypth(k, i, j) = 0; % Handle invalid indexing
-                end
+                hypdist(i, j) = sqrt(distanceEditField{i}.Value^2 + distanceEditField{j}.Value^2);
+                hypth(k, i, j) = sqrt(thickness(k,i)^2 + thickness(k,j)^2);
 
                 % Calculate dose rate based on mode
                 if cbx_idr.Value
                     % IDR mode
-                    hypInDoseRate(idx) = designLimitEditField{j}.Value * F * (doseEditField.Value / (rateEditField.Value * 60)) * (treatmentsidrEditField.Value / 8);
+                    hypInDoseRate(idx) = designLimitEditField{idx+9}.Value * F * (doseEditField.Value / (rateEditField.Value * 60)) * (treatmentsidrEditField.Value / 8); %DesignLimit is worst case scenario for now
                 else
-                    % Instantaneous Dose Rate
-                    if hypdist(i, j) ~= 0
-                        hypInDoseRate(idx) = (activityEditField.Value * numberSourcesEditField.Value * selectedSource.RAKR) / (hypdist(i, j)^2);
-                    else
-                        hypInDoseRate(idx) = 0;
-                    end
+                    hypInDoseRate(idx) = (activityEditField.Value * numberSourcesEditField.Value * selectedSource.RAKR) / (hypdist(i, j)^2);
                 end
-
-                % Dose rate after shielding
-                if hypInDoseRate(idx) > 0 && ~isnan(hypInDoseRate(idx))
-                    hypDoseRate(k, idx) = hypInDoseRate(idx) * exp(-selectedSource.(materials{k}) * density.(materials{k}) * ceil(hypth(k, i, j)));
-                else
-                    hypDoseRate(k, idx) = 0;
-                end
+                hypDoseRate(k, idx) = hypInDoseRate(idx) * exp(-selectedSource.(materials{k}) * density.(materials{k}) * ceil(hypth(k, i, j)));
             end
-
-            % Increment index safely
             idx = idx + 1;
             if idx > numel(hypInDoseRate)
                 break;
             end
         end
-        if idx > numel(hypInDoseRate)
-            break;
-        end
-    end
-    if idx > numel(hypInDoseRate)
-        break;
     end
 end
+
 idx = 1;
-for i = 8:31
+for i = 8:19
     for j = 1:length(materials)
         shieldData{1,i} = sprintf('%.2e uSv/h', hypInDoseRate(idx));
         shieldData{j+1,i} = sprintf('%.2e uSv/h', hypDoseRate(j, idx));
@@ -692,47 +672,119 @@ for i = 8:31
     if idx > numel(hypInDoseRate)
         break;
     end
-    if idx > numel(hypInDoseRate)
-        break;
+end
+
+s1 = uistyle('BackgroundColor','r');
+s2 = uistyle('BackgroundColor','y');
+s3 = uistyle('BackgroundColor','g');
+for i = 8:19
+    for idx = 1:12
+        for j = 1:length(materials)
+            if cbx_idr.Value
+                if hypInDoseRate(idx) < 7.5 %uSv/h
+                    addStyle(shieldTable,s3,'cell',[1,idx+7]);
+                elseif hypInDoseRate(idx) == 7.5
+                    addStyle(shieldTable,s2,'cell',[1,idx+7]);
+                else
+                    addStyle(shieldTable,s1,'cell',[1,idx+7]);
+                end
+            else
+                if hypInDoseRate(idx) < 3 %uSv/h (weekly)
+                    addStyle(shieldTable,s3,'cell',[1,idx+7]);
+                elseif hypInDoseRate(idx) == 3
+                    addStyle(shieldTable,s2,'cell',[1,idx+7]);
+                else
+                    addStyle(shieldTable,s1,'cell',[1,idx+7]);
+                end
+            end
+
+            if hypDoseRate(j, idx) < designLimitEditField{idx+9}.Value
+                addStyle(shieldTable,s3,'cell',[j+1,idx+7]);
+            elseif hypDoseRate(j, idx) == designLimitEditField{idx+9}.Value
+                addStyle(shieldTable,s2,'cell',[j+1,idx+7]);
+            else
+                addStyle(shieldTable,s1,'cell',[j+1,idx+7]);
+            end
+        end
     end
-    if idx > numel(hypInDoseRate)
+end
+
+%% CALCULATE DOSE RATES FOR CORNERS
+chypdist = zeros(3,3,2);
+chypth = zeros(length(materials),3,3,2);
+chypInDoseRate = zeros(1,18);
+chypDoseRate = zeros(length(materials),18);
+idx = 1;
+for i = 1:3
+    for j = 2:4
+        for l = 5:6
+            if i == j || (i == 1 && j == 3) || (i == 2 && j == 4) || (i == 3 && j == 2)
+                continue;
+            else
+                for k = 1:length(materials)
+                    chypdist(i,j,l) = sqrt(hypdist(i,j)^2 + distanceEditField{l}.Value^2);
+                    chypth(k,i,j,l) = sqrt(hypth(k,i,j)^2 + thickness(k,l)^2);
+                    if cbx_idr.Value
+                        % IDR mode
+                        chypInDoseRate(idx) = designLimitEditField{idx+21}.Value * F * (doseEditField.Value / (rateEditField.Value * 60)) * (treatmentsidrEditField.Value / 8);
+                    else
+                        chypInDoseRate(idx) = (activityEditField.Value * numberSourcesEditField.Value * selectedSource.RAKR) / (chypdist(i,j,l)^2);
+                    end
+                    chypDoseRate(k,idx) = chypInDoseRate(idx) * exp(-selectedSource.(materials{k}) * density.(materials{k}) * ceil(chypth(k,i,j,l)));
+                end
+                idx = idx + 1;
+                if idx > numel(hypInDoseRate)
+                    return;
+                end
+            end
+        end
+    end
+end
+
+
+idx = 1;
+for i = 20:27
+    for j = 1:length(materials)
+        shieldData{1,i} = sprintf('%.2e uSv/h', chypInDoseRate(idx));
+        shieldData{j+1,i} = sprintf('%.2e uSv/h', chypDoseRate(j, idx));
+    end
+    idx = idx + 1;
+    if idx > numel(chypInDoseRate)
         break;
     end
 end
 
-for idx = 1:24
-    for j = 1:length(materials)
-        if cbx_idr.Value
-            if hypInDoseRate(idx) < 7.5 %uSv/h
-                addStyle(shieldTable,s3,'cell',[1,idx+7]);
-            elseif hypInDoseRate(idx) == 7.5
-                addStyle(shieldTable,s2,'cell',[1,idx+7]);
+s1 = uistyle('BackgroundColor','r');
+s2 = uistyle('BackgroundColor','y');
+s3 = uistyle('BackgroundColor','g');
+for i = 20:27
+    for idx = 1:8
+        for j = 1:length(materials)
+            if cbx_idr.Value
+                if chypInDoseRate(idx) < 7.5 %uSv/h
+                    addStyle(shieldTable,s3,'cell',[1,idx+19]);
+                elseif chypInDoseRate(idx) == 7.5
+                    addStyle(shieldTable,s2,'cell',[1,idx+19]);
+                else
+                    addStyle(shieldTable,s1,'cell',[1,idx+19]);
+                end
             else
-                addStyle(shieldTable,s1,'cell',[1,idx+7]);
+                if chypInDoseRate(idx) < 3 %uSv/h (weekly)
+                    addStyle(shieldTable,s3,'cell',[1,idx+19]);
+                elseif chypInDoseRate(idx) == 3
+                    addStyle(shieldTable,s2,'cell',[1,idx+19]);
+                else
+                    addStyle(shieldTable,s1,'cell',[1,idx+19]);
+                end
             end
-        else
-            if hypInDoseRate(idx) < 3 %uSv/h (weekly)
-                addStyle(shieldTable,s3,'cell',[1,idx+7]);
-            elseif hypInDoseRate(idx) == 3
-                addStyle(shieldTable,s2,'cell',[1,idx+7]);
-            else
-                addStyle(shieldTable,s1,'cell',[1,idx+7]);
-            end
-        end
 
-        if hypDoseRate(j, idx) < designLimitEditField{7}.Value
-            addStyle(shieldTable,s3,'cell',[j+1,idx+7]);
-        elseif hypDoseRate(j, idx) == designLimitEditField{7}.Value
-            addStyle(shieldTable,s2,'cell',[j+1,idx+7]);
-        else
-            addStyle(shieldTable,s1,'cell',[j+1,idx+7]);
-        end
-        if hypDoseRate(j, idx) < designLimitEditField{8}.Value
-            addStyle(shieldTable,s3,'cell',[j+1,idx+7]);
-        elseif hypDoseRate(j, idx) == designLimitEditField{8}.Value
-            addStyle(shieldTable,s2,'cell',[j+1,idx+7]);
-        else
-            addStyle(shieldTable,s1,'cell',[j+1,idx+7]);
+            if chypDoseRate(j, idx) < designLimitEditField{idx+21}.Value
+                addStyle(shieldTable,s3,'cell',[j+1,idx+19]);
+            elseif chypDoseRate(j, idx) == designLimitEditField{idx+21}.Value
+                addStyle(shieldTable,s2,'cell',[j+1,idx+19]);
+            else
+                addStyle(shieldTable,s1,'cell',[j+1,idx+19]);
+            end
         end
     end
 end
@@ -820,10 +872,10 @@ for j = 1:length(materials)
                 mazeDoseRate{j,i} = 0;
             end
         end
-        shieldData{1,32} = sprintf('%.2e uSv/h', mazeInDoseRate{1,1});
-        shieldData{1,33} = 'NoLeg';
-        shieldData{j+1,32} = sprintf('%.2e uSv/h', mazeDoseRate{j,1});
-        shieldData{j+1,33} = 'NoLeg';
+        shieldData{1,28} = sprintf('%.2e uSv/h', mazeInDoseRate{1,1});
+        shieldData{1,29} = 'NoLeg';
+        shieldData{j+1,28} = sprintf('%.2e uSv/h', mazeDoseRate{j,1});
+        shieldData{j+1,29} = 'NoLeg';
     elseif cbx_twolegmaze.Value
         for i = 1:2
             mazeInDoseRate{1,1} = max(MazeDoseRate);
@@ -837,19 +889,19 @@ for j = 1:length(materials)
                 mazeDoseRate{j,i} = 0;
             end
         end
-        shieldData{1,32} = sprintf('%.2e uSv/h', mazeInDoseRate{1,1});
-        shieldData{1,33} = sprintf('%.2e uSv/h', mazeInDoseRate{1,2});
-        shieldData{j+1,32} = sprintf('%.2e uSv/h', mazeDoseRate{j,1});
-        shieldData{j+1,33} = sprintf('%.2e uSv/h', mazeDoseRate{j,2});
+        shieldData{1,28} = sprintf('%.2e uSv/h', mazeInDoseRate{1,1});
+        shieldData{1,29} = sprintf('%.2e uSv/h', mazeInDoseRate{1,2});
+        shieldData{j+1,28} = sprintf('%.2e uSv/h', mazeDoseRate{j,1});
+        shieldData{j+1,29} = sprintf('%.2e uSv/h', mazeDoseRate{j,2});
     else
         for i = 1:2
             mazeInDoseRate{1,i} = 0;
             mazeDoseRate{j,i} = 0;
         end
-        shieldData{1,32} = 'NoLeg';
-        shieldData{1,33} = 'NoLeg';
-        shieldData{j+1,32} = 'NoLeg';
-        shieldData{j+1,33} = 'NoLeg';
+        shieldData{1,28} = 'NoLeg';
+        shieldData{1,29} = 'NoLeg';
+        shieldData{j+1,28} = 'NoLeg';
+        shieldData{j+1,29} = 'NoLeg';
     end
 
     s1 = uistyle('BackgroundColor','r');
@@ -859,35 +911,35 @@ for j = 1:length(materials)
     for i = 1:2
         if cbx_idr.Value
             if mazeInDoseRate{1,i} < 7.5 %uSv/h
-                addStyle(shieldTable,s3,'cell',[1,i+31]);
+                addStyle(shieldTable,s3,'cell',[1,i+27]);
             elseif mazeInDoseRate{1,i} == 7.5
-                addStyle(shieldTable,s2,'cell',[1,i+31]);
+                addStyle(shieldTable,s2,'cell',[1,i+27]);
             else
-                addStyle(shieldTable,s1,'cell',[1,i+31]);
+                addStyle(shieldTable,s1,'cell',[1,i+27]);
             end
         else
             if mazeInDoseRate{1,i} < 3 %uSv/h (weekly)
-                addStyle(shieldTable,s3,'cell',[1,i+31]);
+                addStyle(shieldTable,s3,'cell',[1,i+27]);
             elseif mazeInDoseRate{1,i} == 3
-                addStyle(shieldTable,s2,'cell',[1,i+31]);
+                addStyle(shieldTable,s2,'cell',[1,i+27]);
             else
-                addStyle(shieldTable,s1,'cell',[1,i+31]);
+                addStyle(shieldTable,s1,'cell',[1,i+27]);
             end
         end
 
         if mazeDoseRate{j,1} < designLimitEditField{7}.Value
-            addStyle(shieldTable,s3,'cell',[j+1,32]);
+            addStyle(shieldTable,s3,'cell',[j+1,28]);
         elseif mazeDoseRate{j,i} == designLimitEditField{7}.Value
-            addStyle(shieldTable,s2,'cell',[j+1,32]);
+            addStyle(shieldTable,s2,'cell',[j+1,28]);
         else
-            addStyle(shieldTable,s1,'cell',[j+1,32]);
+            addStyle(shieldTable,s1,'cell',[j+1,28]);
         end
         if mazeDoseRate{j,2} < designLimitEditField{8}.Value
-            addStyle(shieldTable,s3,'cell',[j+1,33]);
+            addStyle(shieldTable,s3,'cell',[j+1,29]);
         elseif mazeDoseRate{j,2} == designLimitEditField{8}.Value
-            addStyle(shieldTable,s2,'cell',[j+1,33]);
+            addStyle(shieldTable,s2,'cell',[j+1,29]);
         else
-            addStyle(shieldTable,s1,'cell',[j+1,33]);
+            addStyle(shieldTable,s1,'cell',[j+1,29]);
         end
     end
 end
