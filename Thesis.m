@@ -624,10 +624,10 @@ for i = 1:6
 
         % Store the best results for each iteration i
         tableData{4,1} = sprintf('Best Mix');
-        tableData{4, 2*i} = sprintf('%.2f, %.2f, %.2f', bestProportions(1), bestProportions(2), bestProportions(3));
-        tableData{4, 2*i+1} = sprintf('€ %.2e', bestCost);
+        tableData{4,2*i} = sprintf('%.2f, %.2f, %.2f', bestProportions(1), bestProportions(2), bestProportions(3));
+        tableData{4,2*i+1} = sprintf('€ %.2e', bestCost);
         shieldData{5,1} = sprintf('Best Mix');
-        shieldData{5, i+1} = sprintf('%.2e, %.2f uSv/h', bestDoseRate, Index);
+        shieldData{5,i+1} = sprintf('%.2e, %.2f uSv/h', bestDoseRate, Index);
 
         % Update the table data for the current material and distance
         tableData{j,1} = material;
@@ -670,10 +670,13 @@ for i = 1:6
 
         if DoseRate(j,i) < designLimitEditField{i}.Value
             addStyle(shieldTable,s3,'cell',[j+1,i+1]);
+            addStyle(shieldTable,s3,'cell',[5,i+1]);
         elseif DoseRate(j,i) == designLimitEditField{i}.Value
             addStyle(shieldTable,s2,'cell',[j+1,i+1]);
+            addStyle(shieldTable,s2,'cell',[5,i+1]);
         else
             addStyle(shieldTable,s1,'cell',[j+1,i+1]);
+            addStyle(shieldTable,s1,'cell',[5,i+1]);
         end
     end
 end
@@ -684,6 +687,8 @@ hypdist = zeros(4, 6); % Pairwise distances
 hypth = zeros(length(materials), 4, 6);   % Pairwise thicknesses
 hypInDoseRate = zeros(1, 24); % Dose rate at 12 points
 hypDoseRate = zeros(length(materials), 24); % Dose rate per material at 12 points
+besthypth = zeros(1,4,6);
+besthypDoseRate = zeros(1,24);
 
 % Calculate pairwise distances and thicknesses
 idx = 1;
@@ -694,9 +699,15 @@ for i = 1:4
             continue;
         else
             for k = 1:length(materials)
+                propString = tableData{4,2*j};
+                propArray = sscanf(propString, '%f, %f, %f');
+                prop1 = propArray(1);
+                prop2 = propArray(2);
+                prop3 = propArray(3);
                 % Calculate distance and thickness
                 hypdist(i, j) = sqrt(distanceEditField{i}.Value^2 + distanceEditField{j}.Value^2);
                 hypth(k, i, j) = sqrt(thickness(k,i)^2 + thickness(k,j)^2);
+                besthypth(1,i,j) = sqrt((thickness(1,i)*prop1+thickness(2,i)*prop2+thickness(3,i)*prop3)^2 + (thickness(1,j)*prop1+thickness(2,j)*prop2+thickness(3,j)*prop3)^2);
 
                 % Calculate dose rate based on mode
                 if cbx_idr.Value
@@ -710,6 +721,7 @@ for i = 1:4
                 end
 
                 hypDoseRate(k, idx) = hypInDoseRate(idx) * exp(-selectedSource.(materials{k}) * density.(materials{k}) * ceil(hypth(k, i, j)));
+                besthypDoseRate(1,idx) = hypInDoseRate(idx) * exp(-(selectedSource.(materials{1}) * density.(materials{1}) * ceil(besthypth(1, i, j))+selectedSource.(materials{2}) * density.(materials{2}) * ceil(besthypth(1, i, j))+selectedSource.(materials{1}) * density.(materials{1}) * ceil(besthypth(1, i, j))));
                 if isnan(hypDoseRate(k,idx)) || hypDoseRate(k, idx) == Inf || hypDoseRate(k, idx) == -Inf
                     hypDoseRate(k,idx) = 0;
                 end
@@ -727,6 +739,7 @@ for i = 8:19
     for j = 1:length(materials)
         shieldData{1,i} = sprintf('%.2e uSv/h', hypInDoseRate(idx));
         shieldData{j+1,i} = sprintf('%.2e uSv/h', hypDoseRate(j, idx));
+        shieldData{5,i} = sprintf('%.2e uSv/h', besthypDoseRate(1, idx));
     end
     idx = idx + 1;
     if idx > numel(hypInDoseRate)
@@ -760,10 +773,13 @@ for i = 8:19
 
             if hypDoseRate(j, idx) < designLimitEditField{idx+9}.Value
                 addStyle(shieldTable,s3,'cell',[j+1,idx+7]);
+                addStyle(shieldTable,s3,'cell',[5,idx+7]);
             elseif hypDoseRate(j, idx) == designLimitEditField{idx+9}.Value
                 addStyle(shieldTable,s2,'cell',[j+1,idx+7]);
+                addStyle(shieldTable,s2,'cell',[5,idx+7]);
             else
                 addStyle(shieldTable,s1,'cell',[j+1,idx+7]);
+                addStyle(shieldTable,s1,'cell',[5,idx+7]);
             end
         end
     end
@@ -774,6 +790,8 @@ chypdist = zeros(3,3,2);
 chypth = zeros(length(materials),3,3,2);
 chypInDoseRate = zeros(1,18);
 chypDoseRate = zeros(length(materials),18);
+bestchypth = zeros(1,3,3,2);
+bestchypDoseRate = zeros(1,18);
 idx = 1;
 for i = 1:3
     for j = 2:4
@@ -782,8 +800,14 @@ for i = 1:3
                 continue;
             else
                 for k = 1:length(materials)
+                    propString = tableData{4,2*l};
+                    propArray = sscanf(propString, '%f, %f, %f');
+                    prop1 = propArray(1);
+                    prop2 = propArray(2);
+                    prop3 = propArray(3);
                     chypdist(i,j,l) = sqrt(hypdist(i,j)^2 + distanceEditField{l}.Value^2);
                     chypth(k,i,j,l) = sqrt(hypth(k,i,j)^2 + thickness(k,l)^2);
+                    bestchypth(1,i,j,l) = sqrt((besthypth(1,i,j))^2 + (thickness(1,l)*prop1+thickness(2,l)*prop2+thickness(3,l)*prop3)^2);
                     if cbx_idr.Value
                         % IDR mode
                         chypInDoseRate(idx) = designLimitEditField{idx+21}.Value * F * (doseEditField.Value / (rateEditField.Value * 60)) * (treatmentsidrEditField.Value / 8);
@@ -794,7 +818,8 @@ for i = 1:3
                         chypInDoseRate(idx) = 0;
                     end
 
-                    chypDoseRate(k,idx) = chypInDoseRate(idx) * exp(-selectedSource.(materials{k}) * density.(materials{k}) * ceil(chypth(k,i,j,l)));
+                    chypDoseRate(k,idx) = chypInDoseRate(idx) * exp(-(selectedSource.(materials{1}) * density.(materials{1}) * ceil(chypth(1,i,j,l))+selectedSource.(materials{2}) * density.(materials{2}) * ceil(chypth(2,i,j,l))+selectedSource.(materials{3}) * density.(materials{3}) * ceil(chypth(3,i,j,l))));
+                    bestchypDoseRate(1,idx) = hypInDoseRate(idx) * exp(-(selectedSource.(materials{1}) * density.(materials{1}) * ceil(bestchypth(1, i, j))+selectedSource.(materials{2}) * density.(materials{2}) * ceil(bestchypth(1, i, j))+selectedSource.(materials{1}) * density.(materials{1}) * ceil(bestchypth(1, i, j))));
                     if isnan(chypDoseRate(idx)) || chypDoseRate(idx) == Inf || chypDoseRate(idx) == -Inf
                         chypDoseRate(idx) = 0;
                     end
@@ -814,6 +839,7 @@ for i = 20:27
     for j = 1:length(materials)
         shieldData{1,i} = sprintf('%.2e uSv/h', chypInDoseRate(idx));
         shieldData{j+1,i} = sprintf('%.2e uSv/h', chypDoseRate(j, idx));
+        shieldData{5,i} = sprintf('%.2e uSv/h', bestchypDoseRate(1, idx));
     end
     idx = idx + 1;
     if idx > numel(chypInDoseRate)
@@ -847,10 +873,13 @@ for i = 20:27
 
             if chypDoseRate(j, idx) < designLimitEditField{idx+21}.Value
                 addStyle(shieldTable,s3,'cell',[j+1,idx+19]);
+                addStyle(shieldTable,s3,'cell',[5,idx+19]);
             elseif chypDoseRate(j, idx) == designLimitEditField{idx+21}.Value
                 addStyle(shieldTable,s2,'cell',[j+1,idx+19]);
+                addStyle(shieldTable,s2,'cell',[5,idx+19]);
             else
                 addStyle(shieldTable,s1,'cell',[j+1,idx+19]);
+                addStyle(shieldTable,s1,'cell',[5,idx+19]);
             end
         end
     end
@@ -973,10 +1002,10 @@ for j = 1:length(materials)
 
     mixmazeDoseRate = zeros(1, 216);
     mixmazeCost = zeros(1, 216);
-    mazeproportions = zeros(216, 3);
+    mazeproportions = zeros(216, 3,1);
     mixmazeDoseRate_ = zeros(1,216);
     mixmazeCost_ = zeros(1, 216);
-    mazeproportions_ = zeros(216, 3);
+    mazeproportions_ = zeros(216, 3,1);
 
     % Initialize index for cells
     mazeindex = 1;
@@ -985,26 +1014,26 @@ for j = 1:length(materials)
         for p2 = 0:0.2:1
             for p3 = 0:0.2:1
                 % Calculate the mixed dose rate for each combination of proportions
-                mixmazeDoseRate(index, 1) = mazeInDoseRate{1,1} * exp(-((selectedSource.(materials{1}) * density.(materials{1}) * ceil(mazethickness(1,1)) * p1) + (selectedSource.(materials{2}) * density.(materials{2}) * ceil(mazethickness(2,1)) * p2) + (selectedSource.(materials{3}) * density.(materials{3}) * ceil(mazethickness(3,1)) * p3)));
+                mixmazeDoseRate(mazeindex, 1) = mazeInDoseRate{1,1} * exp(-((selectedSource.(materials{1}) * density.(materials{1}) * ceil(mazethickness(1,1)) * p1) + (selectedSource.(materials{2}) * density.(materials{2}) * ceil(mazethickness(2,1)) * p2) + (selectedSource.(materials{3}) * density.(materials{3}) * ceil(mazethickness(3,1)) * p3)));
                 % Calculate the mixed volume
                 mazevolume1 = mazeareaEditField.Value * 1e6 * mazethickness(1,1) * p1;
                 mazevolume2 = mazeareaEditField.Value * 1e6 * mazethickness(2,1) * p2;
                 mazevolume3 = mazeareaEditField.Value * 1e6 * mazethickness(3,1) * p3;
                 % Calculate the mixed cost
-                mixmazeCost(index, 1) = (PriceEditField.(materials{1}).Value * density.(materials{1})*mazevolume1 + PriceEditField.(materials{2}).Value * density.(materials{2})*mazevolume2 + PriceEditField.(materials{3}).Value * density.(materials{3})*mazevolume3);
+                mixmazeCost(mazeindex, 1) = (PriceEditField.(materials{1}).Value * density.(materials{1})*mazevolume1 + PriceEditField.(materials{2}).Value * density.(materials{2})*mazevolume2 + PriceEditField.(materials{3}).Value * density.(materials{3})*mazevolume3);
                 % Store proportions for this combination
-                mazeproportions(index, :) = [p1, p2, p3];
+                mazeproportions(mazeindex, :,1) = [p1, p2, p3];
 
                 % Calculate the mixed dose rate for each combination of proportions
-                mixmazeDoseRate_(index, 1) = mazeInDoseRate{1,2} * exp(-((selectedSource.(materials{1}) * density.(materials{1}) * ceil(mazethickness_(1,1)) * p1) + (selectedSource.(materials{2}) * density.(materials{2}) * ceil(mazethickness_(2,1)) * p2) + (selectedSource.(materials{3}) * density.(materials{3}) * ceil(mazethickness_(3,1)) * p3)));
+                mixmazeDoseRate_(mazeindex_, 1) = mazeInDoseRate{1,2} * exp(-((selectedSource.(materials{1}) * density.(materials{1}) * ceil(mazethickness_(1,1)) * p1) + (selectedSource.(materials{2}) * density.(materials{2}) * ceil(mazethickness_(2,1)) * p2) + (selectedSource.(materials{3}) * density.(materials{3}) * ceil(mazethickness_(3,1)) * p3)));
                 % Calculate the mixed volume
                 mazevolume1_ = mazeareaEditField_.Value * 1e6 * mazethickness_(1,1) * p1;
                 mazevolume2_ = mazeareaEditField_.Value * 1e6 * mazethickness_(2,1) * p2;
                 mazevolume3_ = mazeareaEditField_.Value * 1e6 * mazethickness_(3,1) * p3;
                 % Calculate the mixed cost
-                mixmazeCost_(index, 1) = (PriceEditField.(materials{1}).Value * density.(materials{1})*mazevolume1_ + PriceEditField.(materials{2}).Value * density.(materials{2})*mazevolume2_ + PriceEditField.(materials{3}).Value * density.(materials{3})*mazevolume3_);
+                mixmazeCost_(mazeindex_, 1) = (PriceEditField.(materials{1}).Value * density.(materials{1})*mazevolume1_ + PriceEditField.(materials{2}).Value * density.(materials{2})*mazevolume2_ + PriceEditField.(materials{3}).Value * density.(materials{3})*mazevolume3_);
                 % Store proportions for this combination
-                mazeproportions_(index, :) = [p1, p2, p3];
+                mazeproportions_(mazeindex_, :,1) = [p1, p2, p3];
 
                 % Increment the index
                 mazeindex = mazeindex + 1;
@@ -1031,29 +1060,45 @@ for j = 1:length(materials)
     mazeIndex_ = 0;  % Initialize Index for best mixture
 
     % Find the best mixture based on dose rate and cost for this i
-    for idx = 2:216
-        if (mixmazeDoseRate(idx, 1) <= 0.075) && (mixmazeCost(idx, 1) <= bestmazeCost)
-            bestmazeDoseRate = mixmazeDoseRate(idx, 1);
-            bestmazeCost = mixmazeCost(idx, 1);
-            bestmazeProportions = mazeproportions(idx, :);  % Store the best proportions for this i
-            mazeIndex = idx;
+    for mazeindex = 2:216
+        if (mixmazeDoseRate(mazeindex, 1) <= 0.075) && (mixmazeCost(mazeindex, 1) <= bestmazeCost)
+            bestmazeDoseRate = mixmazeDoseRate(mazeindex, 1);
+            bestmazeCost = mixmazeCost(mazeindex, 1);
+            bestmazeProportions = mazeproportions(mazeindex, :,1);  % Store the best proportions for this i
+            mazeIndex = mazeindex;
         end
 
-        if (mixmazeDoseRate_(idx, 1) <= 0.075) && (mixmazeCost_(idx, 1) <= bestmazeCost_)
-            bestmazeDoseRate_ = mixmazeDoseRate_(idx, 1);
-            bestmazeCost_ = mixmazeCost_(idx, 1);
-            bestmazeProportions_ = mazeproportions_(idx, :);  % Store the best proportions for this i
-            mazeIndex_ = idx;
+        if (mixmazeDoseRate_(mazeindex, 1) <= 0.075) && (mixmazeCost_(mazeindex, 1) <= bestmazeCost_)
+            bestmazeDoseRate_ = mixmazeDoseRate_(mazeindex, 1);
+            bestmazeCost_ = mixmazeCost_(mazeindex, 1);
+            bestmazeProportions_ = mazeproportions_(mazeindex, :,1);  % Store the best proportions for this i
+            mazeIndex_ = mazeindex;
         end
     end
 
     % Store the best results for each iteration i
-    tableData{4, 14} = sprintf('%.2f, %.2f, %.2f', bestmazeProportions(1), bestmazeProportions(2), bestmazeProportions(3));
-    tableData{4, 15} = sprintf('€ %.2e', bestmazeCost);
-    tableData{4, 16} = sprintf('%.2f, %.2f, %.2f', bestmazeProportions_(1), bestmazeProportions_(2), bestmazeProportions_(3));
-    tableData{4, 17} = sprintf('€ %.2e', bestmazeCost_);
-    shieldData{5, 28} = sprintf('%.2e, %.2f uSv/h', bestmazeDoseRate, mazeIndex);
-    shieldData{5, 29} = sprintf('%.2e, %.2f uSv/h', bestmazeDoseRate_, mazeIndex_);
+    if cbx_onelegmaze.Value
+        tableData{4, 14} = sprintf('%.2f, %.2f, %.2f', bestmazeProportions(1), bestmazeProportions(2), bestmazeProportions(3));
+        tableData{4, 15} = sprintf('€ %.2e', bestmazeCost);
+        tableData{4, 16} = 'NoLeg';
+        tableData{4, 17} = 'NoLeg';
+        shieldData{5, 28} = sprintf('%.2e, %.2f uSv/h', bestmazeDoseRate, mazeIndex);
+        shieldData{5, 29} = 'NoLeg';
+    elseif cbx_twolegmaze.Value
+        tableData{4, 14} = sprintf('%.2f, %.2f, %.2f', bestmazeProportions(1), bestmazeProportions(2), bestmazeProportions(3));
+        tableData{4, 15} = sprintf('€ %.2e', bestmazeCost);
+        tableData{4, 16} = sprintf('%.2f, %.2f, %.2f', bestmazeProportions_(1), bestmazeProportions_(2), bestmazeProportions_(3));
+        tableData{4, 17} = sprintf('€ %.2e', bestmazeCost_);
+        shieldData{5, 28} = sprintf('%.2e, %.2f uSv/h', bestmazeDoseRate, mazeIndex);
+        shieldData{5, 29} = sprintf('%.2e, %.2f uSv/h', bestmazeDoseRate_, mazeIndex_);
+    else
+        tableData{4, 14} = 'NoLeg';
+        tableData{4, 15} = 'NoLeg';
+        tableData{4, 16} = 'NoLeg';
+        tableData{4, 17} = 'NoLeg';
+        shieldData{5, 28} = 'NoLeg';
+        shieldData{5, 29} = 'NoLeg';
+    end
 
     s1 = uistyle('BackgroundColor','r');
     s2 = uistyle('BackgroundColor','y');
@@ -1080,17 +1125,23 @@ for j = 1:length(materials)
 
         if mazeDoseRate{j,1} < designLimitEditField{7}.Value
             addStyle(shieldTable,s3,'cell',[j+1,28]);
+            addStyle(shieldTable,s3,'cell',[5,28]);
         elseif mazeDoseRate{j,i} == designLimitEditField{7}.Value
             addStyle(shieldTable,s2,'cell',[j+1,28]);
+            addStyle(shieldTable,s2,'cell',[5,28]);
         else
             addStyle(shieldTable,s1,'cell',[j+1,28]);
+            addStyle(shieldTable,s1,'cell',[5,28]);
         end
         if mazeDoseRate{j,2} < designLimitEditField{8}.Value
             addStyle(shieldTable,s3,'cell',[j+1,29]);
+            addStyle(shieldTable,s3,'cell',[5,29]);
         elseif mazeDoseRate{j,2} == designLimitEditField{8}.Value
             addStyle(shieldTable,s2,'cell',[j+1,29]);
+            addStyle(shieldTable,s2,'cell',[5,29]);
         else
             addStyle(shieldTable,s1,'cell',[j+1,29]);
+            addStyle(shieldTable,s1,'cell',[5,29]);
         end
     end
 end
