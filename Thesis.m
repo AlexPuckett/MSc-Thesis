@@ -427,7 +427,7 @@ if cbx_idr.Value
     workloadValue.Interpreter = 'tex';
 else
     % W = RAKR*A*n*t*N
-    workload = selectedSource.RAKR * activityEditField.Value * numberSourcesEditField.Value * (doseEditField.Value / (rateEditField.Value * 60)) * treatmentsEditField.Value;
+    workload = selectedSource.RAKR * activityEditField.Value * numberSourcesEditField.Value * (doseEditField.Value / (rateEditField.Value * 60)) * treatmentsEditField.Value * 40;
 
     % Set workload to 0 if it is negative
     if workload < 0
@@ -454,11 +454,11 @@ for i = 1:6
     else
         transmissionFactor(i) = (designLimitEditField{i}.Value * F * distanceEditField{i}.Value^2) / (workload * occupationFactorEditField{i}.Value);
         if cbx_onelegmaze.Value
-            entrancetransmissionFactor  = (designLimitEditField{7}.Value * F * entrancedistEditField{1}.Value^2) / (workload * occupationFactorEditField{i}.Value);
+            entrancetransmissionFactor  = (designLimitEditField{7}.Value * F * entrancedistEditField{1}.Value^2) / (workload * occupationFactorEditField{7}.Value);
             entrancetransmissionFactor_  = 0;
         elseif cbx_twolegmaze.Value
-            entrancetransmissionFactor  = (designLimitEditField{7}.Value * F * entrancedistEditField{1}.Value^2) / (workload * occupationFactorEditField{i}.Value);
-            entrancetransmissionFactor_  = (designLimitEditField{8}.Value * F * entrancedistEditField{2}.Value^2) / (workload * occupationFactorEditField{i}.Value);
+            entrancetransmissionFactor  = (designLimitEditField{7}.Value * F * entrancedistEditField{1}.Value^2) / (workload * occupationFactorEditField{7}.Value);
+            entrancetransmissionFactor_  = (designLimitEditField{8}.Value * F * entrancedistEditField{2}.Value^2) / (workload * occupationFactorEditField{8}.Value);
         else
             entrancetransmissionFactor  = 0;
             entrancetransmissionFactor_  = 0;
@@ -610,7 +610,6 @@ for i = 1:6
         bestDoseRate = inf;
         bestCost = inf;
         bestProportions = [0, 0, 0];  % Initialize best proportions for each i
-        Index = 0;  % Initialize Index for best mixture
 
         % Find the best mixture based on dose rate and cost for this i
         for idx = 2:216
@@ -618,7 +617,6 @@ for i = 1:6
                 bestDoseRate = mixDoseRate(idx, 1, i);
                 bestCost = mixCost(idx, 1, i);
                 bestProportions = proportions(idx, :, i);  % Store the best proportions for this i
-                Index = idx;
             end
         end
 
@@ -627,7 +625,7 @@ for i = 1:6
         tableData{4,2*i} = sprintf('%.2f, %.2f, %.2f', bestProportions(1), bestProportions(2), bestProportions(3));
         tableData{4,2*i+1} = sprintf('€ %.2e', bestCost);
         shieldData{5,1} = sprintf('Best Mix');
-        shieldData{5,i+1} = sprintf('%.2e, %.2f uSv/h', bestDoseRate, Index);
+        shieldData{5,i+1} = sprintf('%.2e uSv/h', bestDoseRate);
 
         % Update the table data for the current material and distance
         tableData{j,1} = material;
@@ -905,7 +903,7 @@ for j = 1:length(materials)
         a1 = (C1*K)/((selectedSource.(material) * 1e-5)+u2*(cosd(incidentangleEditField{1}.Value)/cosd(refangleEditField{1}.Value)));
         a1_ = (C1_)/((selectedSource.(material) * 1e-5)+u2_*(cosd(incidentangleEditField{1}.Value)/cosd(refangleEditField{1}.Value)));
         a = a1 + a1_;
-        MazeDoseRate(j) = (selectedSource.RAKR*activityEditField.Value*numberSourcesEditField.Value*F/mazedistEditField{1}.Value^2)*(a*(mazeareaaEditField{1}.Value + mazeareabEditField{1}.Value)/(mazedistEditField{2}.Value^2)) + designLimitEditField{8}.Value*F;
+        MazeDoseRate(j) = (selectedSource.RAKR*activityEditField.Value*numberSourcesEditField.Value*F/mazedistEditField{1}.Value^2)*(a*1e-2*(mazeareaaEditField{1}.Value + mazeareabEditField{1}.Value)/(mazedistEditField{2}.Value^2)) + designLimitEditField{8}.Value*F;
         mazeData{j,1} = material;
         mazeData{j,2} = sprintf('%.2e uSv/h', MazeDoseRate(j));
         mazeData{j,3} = sprintf('NoMazeLeg');
@@ -1052,12 +1050,10 @@ for j = 1:length(materials)
     bestmazeDoseRate = inf;
     bestmazeCost = inf;
     bestmazeProportions = [0, 0, 0];  % Initialize best proportions for each i
-    mazeIndex = 0;  % Initialize Index for best mixture
 
     bestmazeDoseRate_ = inf;
     bestmazeCost_ = inf;
     bestmazeProportions_ = [0, 0, 0];  % Initialize best proportions for each i
-    mazeIndex_ = 0;  % Initialize Index for best mixture
 
     % Find the best mixture based on dose rate and cost for this i
     for mazeindex = 2:216
@@ -1065,15 +1061,20 @@ for j = 1:length(materials)
             bestmazeDoseRate = mixmazeDoseRate(mazeindex, 1);
             bestmazeCost = mixmazeCost(mazeindex, 1);
             bestmazeProportions = mazeproportions(mazeindex, :,1);  % Store the best proportions for this i
-            mazeIndex = mazeindex;
         end
 
         if (mixmazeDoseRate_(mazeindex, 1) <= 0.075) && (mixmazeCost_(mazeindex, 1) <= bestmazeCost_)
             bestmazeDoseRate_ = mixmazeDoseRate_(mazeindex, 1);
             bestmazeCost_ = mixmazeCost_(mazeindex, 1);
             bestmazeProportions_ = mazeproportions_(mazeindex, :,1);  % Store the best proportions for this i
-            mazeIndex_ = mazeindex;
         end
+    end
+
+    if isnan(bestmazeCost) || bestmazeCost == Inf || bestmazeCost == -Inf
+        bestmazeCost = 0;
+    end
+    if isnan(bestmazeCost_) || bestmazeCost_ == Inf || bestmazeCost_ == -Inf
+        bestmazeCost_ = 0;
     end
 
     % Store the best results for each iteration i
@@ -1082,15 +1083,15 @@ for j = 1:length(materials)
         tableData{4, 15} = sprintf('€ %.2e', bestmazeCost);
         tableData{4, 16} = 'NoLeg';
         tableData{4, 17} = 'NoLeg';
-        shieldData{5, 28} = sprintf('%.2e, %.2f uSv/h', bestmazeDoseRate, mazeIndex);
+        shieldData{5, 28} = sprintf('%.2e uSv/h', bestmazeDoseRate);
         shieldData{5, 29} = 'NoLeg';
     elseif cbx_twolegmaze.Value
         tableData{4, 14} = sprintf('%.2f, %.2f, %.2f', bestmazeProportions(1), bestmazeProportions(2), bestmazeProportions(3));
         tableData{4, 15} = sprintf('€ %.2e', bestmazeCost);
         tableData{4, 16} = sprintf('%.2f, %.2f, %.2f', bestmazeProportions_(1), bestmazeProportions_(2), bestmazeProportions_(3));
         tableData{4, 17} = sprintf('€ %.2e', bestmazeCost_);
-        shieldData{5, 28} = sprintf('%.2e, %.2f uSv/h', bestmazeDoseRate, mazeIndex);
-        shieldData{5, 29} = sprintf('%.2e, %.2f uSv/h', bestmazeDoseRate_, mazeIndex_);
+        shieldData{5, 28} = sprintf('%.2e uSv/h', bestmazeDoseRate);
+        shieldData{5, 29} = sprintf('%.2e uSv/h', bestmazeDoseRate_);
     else
         tableData{4, 14} = 'NoLeg';
         tableData{4, 15} = 'NoLeg';
