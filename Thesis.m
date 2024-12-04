@@ -188,7 +188,7 @@ for i = 1:2
 end
 
 workloadLabel = uilabel(workloadPanel, 'Text', 'W', 'Interpreter', 'tex', 'Position', [10, 0, 175, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
-workloadValue = uilabel(workloadPanel, 'Text', '-', 'Position', [60, 0, 120, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
+workloadValue = uilabel(workloadPanel, 'Text', '-', 'Position', [50, 0, 120, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
 
 % Labels and Edit Fields for Material Prices
 LeadPriceLabel = uilabel(pricesPanel, "Text", "Pb Pr.[Eu/Kg]", 'Interpreter', 'tex', "Position", [10, 60, 100, 22], 'FontWeight', 'bold', 'FontSize', 10, 'FontColor', 'black');
@@ -903,6 +903,7 @@ for j = 1:length(materials)
         a1 = (C1*K)/((selectedSource.(material) * 1e-5)+u2*(cosd(incidentangleEditField{1}.Value)/cosd(refangleEditField{1}.Value)));
         a1_ = (C1_)/((selectedSource.(material) * 1e-5)+u2_*(cosd(incidentangleEditField{1}.Value)/cosd(refangleEditField{1}.Value)));
         a = a1 + a1_;
+        % [(uGym^2/MBqh)*MBq/m^2]*(m^2/m^2) + [uGy/h]
         MazeDoseRate(j) = (selectedSource.RAKR*activityEditField.Value*numberSourcesEditField.Value*F/mazedistEditField{1}.Value^2)*(a*1e-2*(mazeareaaEditField{1}.Value + mazeareabEditField{1}.Value)/(mazedistEditField{2}.Value^2)) + designLimitEditField{8}.Value*F;
         mazeData{j,1} = material;
         mazeData{j,2} = sprintf('%.2e uSv/h', MazeDoseRate(j));
@@ -1176,8 +1177,8 @@ exportTable2 = cell2table(mazeTable.Data, 'VariableNames', mazeTable.ColumnName)
 
 % Write the table to the Excel file
 writetable(exportTable, excelFileName, 'Sheet', 1, 'Range', 'A1');
-writetable(exportTable1,excelFileName, 'Sheet', 1, 'Range', 'A6');
-writetable(exportTable2,excelFileName, 'Sheet', 1, 'Range', 'A12');
+writetable(exportTable1,excelFileName, 'Sheet', 1, 'Range', 'A10');
+writetable(exportTable2,excelFileName, 'Sheet', 1, 'Range', 'A20');
 
 % Alert user of successful save
 uialert(mainFig, 'Data saved successfully!', 'Save Confirmation');
