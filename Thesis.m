@@ -81,6 +81,7 @@ massattcoef = struct();
 massattcoef.Lead = readtable('Materials.xlsx','Sheet','Lead','ReadVariableNames',false);
 massattcoef.Steel = readtable('Materials.xlsx','Sheet','Steel','ReadVariableNames',false);
 massattcoef.ConcreteBa = readtable('Materials.xlsx','Sheet','ConcreteBarite','ReadVariableNames',false);
+massattcoef.Air = readtable('Materials.xlsx','Sheet','Air','ReadVariableNames',false);
 
 %% Creating Labels, Edit Fields, Checkboxes and DropDowns
 % Dropdown for sources
@@ -895,13 +896,14 @@ for j = 1:length(materials)
     if cbx_onelegmaze.Value
         scatangle = 180 - (incidentangleEditField{1}.Value + refangleEditField{1}.Value);
         E_ = E/(1+((E/0.511)*(1-cosd(scatangle))));
+        u1 = interp1(massattcoef.Air{:,1},massattcoef.Air{:,2},E);
         u2 = interp1(massattcoef.(material){:,1},massattcoef.(material){:,2},E); %mass attenuation coef. after reflection
         u2_ = interp1(massattcoef.(material){:,1},massattcoef.(material){:,3},E); % energy mass att. coef. after reflection
         C1 = interp1(Parameters{:,1},Parameters{:,2},E);
         C1_ = interp1(Parameters{:,1},Parameters{:,3},E);
         K = ((electronrad^2)/2)*((E_/E)^2)*((E/E_) + (E_/E) - (sind(scatangle))^2);
-        a1 = (C1*K)/((selectedSource.(material) * 1e-5)+u2*(cosd(incidentangleEditField{1}.Value)/cosd(refangleEditField{1}.Value)));
-        a1_ = (C1_)/((selectedSource.(material) * 1e-5)+u2_*(cosd(incidentangleEditField{1}.Value)/cosd(refangleEditField{1}.Value)));
+        a1 = (C1*K)/(u1+u2*(cosd(incidentangleEditField{1}.Value)/cosd(refangleEditField{1}.Value)));
+        a1_ = (C1_)/(u1+u2_*(cosd(incidentangleEditField{1}.Value)/cosd(refangleEditField{1}.Value)));
         a = a1 + a1_;
         % [(uGym^2/MBqh)*MBq/m^2]*(m^2/m^2) + [uGy/h]
         MazeDoseRate(j) = (selectedSource.RAKR*activityEditField.Value*numberSourcesEditField.Value*F/mazedistEditField{1}.Value^2)*(a*1e-2*(mazeareaaEditField{1}.Value + mazeareabEditField{1}.Value)/(mazedistEditField{2}.Value^2)) + designLimitEditField{8}.Value*F;
@@ -914,8 +916,10 @@ for j = 1:length(materials)
         end
         E_ = E/(1+((E/0.511)*(1-cosd(scatangle{1}))));
         E1_ = E_/(1+((E_/0.511)*(1-cosd(scatangle{2}))));
+        u1 = interp1(massattcoef.Air{:,1},massattcoef.Air{:,2},E);
         u2 = interp1(massattcoef.(material){:,1},massattcoef.(material){:,2},E); %mass attenuation coef. after reflection
         u2_ = interp1(massattcoef.(material){:,1},massattcoef.(material){:,3},E); % energy mass att. coef. after reflection
+        u11 = interp1(massattcoef.Air{:,1},massattcoef.Air{:,2},E_);
         u22 = interp1(massattcoef.(material){:,1},massattcoef.(material){:,2},E_); %mass attenuation coef. after reflection
         u22_ = interp1(massattcoef.(material){:,1},massattcoef.(material){:,3},E_); % energy mass att. coef. after reflection
         C1 = interp1(Parameters{:,1},Parameters{:,2},E);
@@ -924,11 +928,11 @@ for j = 1:length(materials)
         C2_ = interp1(Parameters{:,1},Parameters{:,3},E_);
         K = ((electronrad^2)/2)*((E_/E)^2)*((E/E_) + (E_/E) - (sind(scatangle{1}))^2);
         K_ = ((electronrad^2)/2)*((E1_/E_)^2)*((E_/E1_) + (E1_/E_) - (sind(scatangle{2}))^2);
-        a1 = (C1*K)/((selectedSource.(material) * 1e-5)+u2*(cosd(incidentangleEditField{1}.Value)/cosd(refangleEditField{1}.Value)));
-        a1_ = (C1_)/((selectedSource.(material) * 1e-5)+u2_*(cosd(incidentangleEditField{1}.Value)/cosd(refangleEditField{1}.Value)));
+        a1 = (C1*K)/(u1+u2*(cosd(incidentangleEditField{1}.Value)/cosd(refangleEditField{1}.Value)));
+        a1_ = (C1_)/(u11+u2_*(cosd(incidentangleEditField{1}.Value)/cosd(refangleEditField{1}.Value)));
         a = a1 + a1_;
-        a2 = (C2*K_)/((selectedSource.(material) * 1e-5)+u22*(cosd(incidentangleEditField{2}.Value)/cosd(refangleEditField{2}.Value)));
-        a2_ = (C2_)/((selectedSource.(material) * 1e-5)+u22_*(cosd(incidentangleEditField{2}.Value)/cosd(refangleEditField{2}.Value)));
+        a2 = (C2*K_)/(u11+u22*(cosd(incidentangleEditField{2}.Value)/cosd(refangleEditField{2}.Value)));
+        a2_ = (C2_)/(u11+u22_*(cosd(incidentangleEditField{2}.Value)/cosd(refangleEditField{2}.Value)));
         a_ = a2 + a2_;
         MazeDoseRate(j) = ((selectedSource.RAKR*activityEditField.Value*numberSourcesEditField.Value*F/mazedistEditField{1}.Value^2)*(a*1e-2*(mazeareaaEditField{1}.Value + mazeareabEditField{1}.Value)/(mazedistEditField{2}.Value^2))) + (designLimitEditField{9}.Value*F);
         if isnan(MazeDoseRate(j))
